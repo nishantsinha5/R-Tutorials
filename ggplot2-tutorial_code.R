@@ -2,7 +2,7 @@
 # A ggplot2 tutorial based on                                                         #
 # http://zevross.com/blog/2014/08/04/beautiful-plotting-in-r-a-ggplot2-cheatsheet-3/) #
 #-------------------------------------------------------------------------------------#
-# CÃ©dric Scherer (scherer@izw-berlin.de), 13. January 2017                            #
+# Cédric Scherer (scherer@izw-berlin.de), 13. January 2017                            #
 #-------------------------------------------------------------------------------------#
 
 #### Install packages ####
@@ -12,7 +12,6 @@
 #install.packages("grid")
 #install.packages("gridExtra")
 #install.packages("reshape2")
-#install.packages("rgdal")
 #install.packages("shiny")
 
 #### Load ggplot2 ####
@@ -410,14 +409,6 @@ ggplot(df.chic, aes(temp, death)) +
    geom_point(col = "firebrick") +
    labs(x = "Temperature", y = "Deaths") +
    geom_abline(intercept = lmTemp$coef[1], slope = lmTemp$coef[2], col = "darkorange1", size = 1.3)
-
-#### Working with maps ####
-library(rgdal)
-counties <- readOGR("nybb.shp", layer = "nybb")
-ggplot() +  geom_polygon(data=counties, aes(x=long, y=lat, group=group))
-
-library(maptools)
-readShapePoly(system.file("nybb.shp", package="maptools"))
 
 #### Working with interactive graphs ####
 library(shiny)
