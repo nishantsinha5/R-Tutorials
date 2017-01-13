@@ -2,7 +2,7 @@
 # A ggplot2 tutorial based on                                                         #
 # http://zevross.com/blog/2014/08/04/beautiful-plotting-in-r-a-ggplot2-cheatsheet-3/) #
 #-------------------------------------------------------------------------------------#
-# Cédric Scherer (scherer@izw-berlin.de), 11. January 2017                            #
+# Cédric Scherer (scherer@izw-berlin.de), 13. January 2017                            #
 #-------------------------------------------------------------------------------------#
 
 #### Install packages ####
