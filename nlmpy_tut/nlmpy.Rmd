@@ -23,7 +23,7 @@ options(htmltools.dir.version = FALSE)
 
 # Basics
 
-They are a plethora of standalone software packages out there to create neutral landscape models, unfortunalety is the only R package [(ecomodtools)](https://rdrr.io/rforge/ecomodtools/) to achieve this no longer available. Hence, the python library NLMPY by @etherington2015nlmpy is right now the most versatile tool to create artificial landscapes in a coding workflow and it can be embedded into larger modelling frameworks based on software that is capable of executing a Python script, such as R. 
+There are a plethora of standalone software packages out there to create neutral landscape models, unfortunalety is the only R package [(ecomodtools)](https://rdrr.io/rforge/ecomodtools/) to achieve this no longer available. Hence, the python library NLMPY by @etherington2015nlmpy is right now the most versatile tool to create artificial landscapes in a coding workflow and it can be embedded into larger modelling frameworks based on software that is capable of executing a Python script, such as R. 
 
 NLMPY produces two-dimensonal arrays by performing different neutral landscape model algorithms (Fig. 1). Furthermore, NLMPY allows the user to blend and classify every raster.
 With this, novel combinations of algorithms can be achieved. The package is capable of doing a lot more, but here we will limit its use to create only landscapes. If you want to dig deeper, have a look on the linked [paper](http://onlinelibrary.wiley.com/doi/10.1111/2041-210X.12308/abstract) and their Youtube introductions: [installing](http://bit.ly/1qLfMjt), [using](http://bit.ly/2491u9n).
