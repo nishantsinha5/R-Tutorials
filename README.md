@@ -6,7 +6,7 @@ Authors:
 
 Cédric Scherer (scherer@izw-berlin.de)
 
-Marco Sciaini (msciain@uni-goettingen.de)
+Marco Sciaini (msciain@gwdg.de)
 
 
 ## ggplot2 Tutorial:
@@ -18,4 +18,4 @@ Most changes were made to follow the [R style guide](http://adv-r.had.co.nz/Styl
 
 ## NLMPY in R Tutorial:
 
-[html version]()
+[html version](https://rawgit.com/Z3tt/R-Tutorials/master/nlmpy_tut/nlmpy.html)
