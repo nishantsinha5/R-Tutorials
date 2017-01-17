@@ -1,5 +1,5 @@
 ---
-title: "Creating neutral landscape for ecological models with NLMPY"
+title: "Creating neutral landscapes for ecological models with NLMPY"
 subtitle: "An instruction to use NLMPY from within R"
 author:
   - name: Marco Sciaini, [spatialrecology.org](spatialrecology.org)
