@@ -1,13 +1,10 @@
-# R Tutorials
+﻿# R Tutorials
 
-A collection of tutorials dealing with the use of R packages as ggplot2, dplyR, tidyR, magrittR and shiny. To use online, in workshops and exercises.
+A collection of tutorials dealing with the use of R packages as ggplot2, Rmarkdown, dplyR, tidyR, magrittR, shiny and NLMpy via PythonInR. For presentation and exercises at workshops as well as to use online as tutorial and cheatsheet .
 
 Authors:
-
-Cédric Scherer (scherer@izw-berlin.de)
-
-Marco Sciaini (msciain@gwdg.de)
-
+* Cédric Scherer (scherer@izw-berlin.de)
+* Marco Sciaini (msciain@gwdg.de)
 
 ## ggplot2 Tutorial:
 
