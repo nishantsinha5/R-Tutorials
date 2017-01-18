@@ -19,3 +19,5 @@ Most changes were made to follow the [R style guide](http://adv-r.had.co.nz/Styl
 ## NLMPY in R Tutorial:
 
 [html version](https://rawgit.com/Z3tt/R-Tutorials/master/nlmpy_tut/nlmpy.html)
+
+NLMPY is a free python library to create spatial data from neutral landscape models. This tutorial introduces you into the basic usage and how to run python code from within R.

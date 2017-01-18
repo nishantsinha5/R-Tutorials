@@ -147,7 +147,7 @@ PythonInR::pyExec(code = init_landscape)
 The code will generate a file called `nlmmpddistclass.asc` in the working directory of python, which we can reimport in R (for example with the the raster package).
 
 # Neutral landscape visualization
-To check the result of our python code, we import it as raster and plot it with the [`rasterVis`](https://oscarperpinan.github.io/rastervis/) package. `rasterVis` allows to use the ggplot syntax to plat raster objects.
+To check the result of our python code, we import it as raster and plot it with the [`rasterVis`](https://oscarperpinan.github.io/rastervis/) package. `rasterVis` allows to use the ggplot syntax to plot raster objects.
 
 ```{r, eval=FALSE}
 # load packages ----
