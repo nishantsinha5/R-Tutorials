@@ -110,9 +110,9 @@ os.chdir(<span class="st">&quot;path/to/your/folder&quot;</span>) <span class="c
 <span class="im">import</span> numpy <span class="im">as</span> np
 
 <span class="co"># set up generation of landscapes</span>
-np.random.seed(<span class="dv">1</span>)   <span class="co"># set seed, so that the same NLMs are produced each time</span>
-nRow <span class="op">=</span> <span class="dv">210</span>          <span class="co"># Number of rows</span>
-nCol <span class="op">=</span> <span class="dv">100</span>          <span class="co"># Number of columns</span>
+np.random.seed(<span class="dv">1</span>)   
+nRow <span class="op">=</span> <span class="dv">210</span>          
+nCol <span class="op">=</span> <span class="dv">100</span>          
 
 <span class="co"># create midpoint-displacement array</span>
 nlmmpd <span class="op">=</span> nlmpy.mpd (nRow, nCol, h <span class="op">=</span> <span class="fl">0.75</span>)
@@ -150,9 +150,9 @@ init_landscape &lt;-<span class="st"> '</span>
 <span class="st">import numpy as np</span>
 
 <span class="st"># set up generation of landscapes</span>
-<span class="st">np.random.seed(1)   # set seed, so that the same NLMs are produced each time</span>
-<span class="st">nRow = 210          # Number of rows</span>
-<span class="st">nCol = 100          # Number of columns</span>
+<span class="st">np.random.seed(1)   </span>
+<span class="st">nRow = 210         </span>
+<span class="st">nCol = 100         </span>
 
 <span class="st"># create midpoint-displacement array</span>
 <span class="st">nlmmpd = nlmpy.mpd (nRow, nCol, h = 0.75)</span>
