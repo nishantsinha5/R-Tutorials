@@ -72,9 +72,9 @@ import nlmpy
 import numpy as np
 
 # set up generation of landscapes
-np.random.seed(1)   # set seed, so that the same NLMs are produced each time
-nRow = 210          # Number of rows
-nCol = 100          # Number of columns
+np.random.seed(1)   
+nRow = 210          
+nCol = 100          
 
 # create midpoint-displacement array
 nlmmpd = nlmpy.mpd (nRow, nCol, h = 0.75)
@@ -116,9 +116,9 @@ import nlmpy
 import numpy as np
 
 # set up generation of landscapes
-np.random.seed(1)   # set seed, so that the same NLMs are produced each time
-nRow = 210          # Number of rows
-nCol = 100          # Number of columns
+np.random.seed(1)   
+nRow = 210         
+nCol = 100         
 
 # create midpoint-displacement array
 nlmmpd = nlmpy.mpd (nRow, nCol, h = 0.75)
@@ -182,9 +182,9 @@ import nlmpy
 import numpy as np
 
 # set up generation of landscapes
-np.random.seed(1)   # set seed, so that the same NLMs are produced each time
-nRow = 210          # Number of rows
-nCol = 100          # Number of columns
+np.random.seed(1)   
+nRow = 210         
+nCol = 100         
 
 # create midpoint-displacement array
 nlmmpd = nlmpy.mpd (nRow, nCol, h = 0.75)
