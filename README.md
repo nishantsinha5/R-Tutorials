@@ -21,6 +21,6 @@ NLMPY is a free python library to create spatial data from neutral landscape mod
 
 ## (R)Markdown cheat sheet:
 
-[html version](https://rawgit.com/Z3tt/R-Tutorials/master/nlmpy_tut/nlmpy.html)
+[html version](https://rawgit.com/Z3tt/R-Tutorials/master/rmarkdown_cheat_sheet/scientific_rmarkdown.html)
 
 A short instruction in how to use Markdown for scientific writing, with focus on rmarkdown and the usage in RStudio.
