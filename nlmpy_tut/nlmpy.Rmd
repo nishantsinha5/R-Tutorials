@@ -139,7 +139,6 @@ nlmmpddistclass = nlmpy.classifyArray(nlmmpddist, [1,1,1])
 nlmpy.exportASCIIGrid("nlmmpddistclass.asc", nlmmpddistclass)
 '
 
-
 # execute python code to create neutral landscapes ----
 PythonInR::pyExec(code = init_landscape)
 ```
@@ -147,7 +146,7 @@ PythonInR::pyExec(code = init_landscape)
 The code will generate a file called `nlmmpddistclass.asc` in the working directory of python, which we can reimport in R (for example with the the raster package).
 
 # Neutral landscape visualization
-To check the result of our python code, we import it as raster and plot it with the [`rasterVis`](https://oscarperpinan.github.io/rastervis/) package. `rasterVis` allows to use the ggplot syntax to plot raster objects.
+To check the result of our python code, we import it as raster and plot it using the [`rasterVis`](https://oscarperpinan.github.io/rastervis/) package. `rasterVis` allows to use the ggplot syntax to plot raster objects.
 
 ```{r, eval=FALSE}
 # load packages ----
@@ -161,9 +160,9 @@ mpd.raster <- raster('path/to/your/folder/nlmmpddistclass.asc')
 
 # plot and check raster from nlmpy ----
 gplot(mpd.raster) + geom_tile(aes(fill = value)) +
-                                          coord_equal() +
-                                          scale_fill_viridis() +
-                                          theme_void() 
+                        coord_equal() +
+                        scale_fill_viridis("") +
+                        theme_void() 
 ```
 
 ```{r, eval=TRUE, echo=FALSE, message=FALSE}
@@ -205,7 +204,6 @@ nlmmpddistclass = nlmpy.classifyArray(nlmmpddist, [1,1,1])
 nlmpy.exportASCIIGrid("nlmmpddistclass.asc", nlmmpddistclass)
 '
 
-
 # execute python code to create neutral landscapes ----
 PythonInR::pyExec(code = init_landscape)
 
@@ -221,8 +219,7 @@ mpd.raster <- raster('C:/Users/Marco/PhD_Cloud/5_SideProjects/R-Tutorials/nlmpy_
 # plot and check raster from nlmpy ----
 gplot(mpd.raster) + geom_tile(aes(fill = value)) +
   coord_equal() +
-  scale_fill_viridis() +
+  scale_fill_viridis("") +
   theme_void() 
-
 ```
 
