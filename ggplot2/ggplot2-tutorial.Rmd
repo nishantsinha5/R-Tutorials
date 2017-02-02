@@ -44,9 +44,11 @@ Major changes were made:
     + `grid`
     + `gridExtra`
     + `reshape2`
+    + `akima`
+    + `shiny`
 
 # Loading `ggplot2`
-```{r library}
+```{r library, message = F}
 library(ggplot2)
 ```
 
@@ -684,14 +686,14 @@ Effective? Yes.
 
 Interesting? No.
 
-## 1. Alternative: Plot of Points
+### 1. Alternative: Plot of Points
 ```{r geom_point}
 g + geom_point(color = "firebrick")
 ```
 
 Not only boring but uninformative. One could add transparency to deal with overplotting, but this is not good either.
 
-## 2. Alternative: Jitter the Points
+### 2. Alternative: Jitter the Points
 
 Try adding a little jitter to the data. I like this for in-house visualization but be careful using jittering because you are purposely adding noise to your data and this can result in misinterpretation of your data.
 ```{r geom_jitter}
@@ -699,48 +701,19 @@ g + geom_jitter(alpha = 0.5, aes(color = season), position = position_jitter(wid
          theme(legend.title = element_blank())
 ```
 
-## 3. Alternative: Violin Plots
+### 3. Alternative: Violin Plots
 
 Violin plots, similar to box plots except you are using a kernel density to show where you have the most data, are a useful visualization.
 ```{r geom_violin}
 g + geom_violin(color = "sienna", fill = "red", alpha = 0.4)
 ```
 
-## 4. Alternative: Combining Violin Plots with Jitter
+### 4. Alternative: Combining Violin Plots with Jitter
 ```{r violin + jitter}
 g + geom_violin(color = "gray", alpha = 0.5) +
     geom_jitter(aes(color = season), position = position_jitter(width = 0.3), alpha = 0.3) +
     theme(legend.title = element_blank()) +
     coord_flip()
-```
-
-## Add a Ribbon to Your Plot (Addinga Given Range, AUC, CI, etc.)
-This is not the perfect dataset for this, but using ribbon can be useful. In this example we will create a 30-day running average using the filter() function so that our ribbon is not too noisy.
-```{r default for ribbon, warning = F}
-chic$o3run <- as.numeric(filter(chic$o3, rep(1/30, 30), sides = 2))
-
-ggplot(chic, aes(date, o3run)) +
-   geom_line(color = "chocolate", lwd = 1) +
-   labs(x = "Year", y = "Temperature")
-```
-
-How does it look if we fill in the area below the curve using the `geom_ribbon()` function?
-```{r geom_ribbon AUC, warning = F}
-ggplot(chic, aes(date, o3run)) +
-   geom_ribbon(aes(ymin = 0, ymax = o3run), fill = "orange", color = "orange", alpha = 0.4) +
-   geom_line(color = "chocolate", lwd = 1) +
-   labs(x = "Year", y = "Temperature")
-```
-
-Nice to indicate the [area under the curve (AUC)](https://en.wikipedia.org/wiki/Area_under_the_curve_(pharmacokinetics)) but this is not really the conventional way to use `geom_ribbon()`. Instead, we draw a ribbon that gives us one standard deviation above and below our data:
-```{r geom_ribbon range, warning = F}
-chic$mino3 <- chic$o3run - sd(chic$o3run, na.rm = T)
-chic$maxo3 <- chic$o3run + sd(chic$o3run, na.rm = T)
-
-ggplot(chic, aes(date, o3run)) +
-   geom_ribbon(aes(ymin = mino3, ymax = maxo3), fill = "lightskyblue", color = "lightskyblue") +
-   geom_line(color = "royalblue4", lwd = 0.7) +
-   labs(x = "Year", y = "Temperature")
 ```
 
 ## Create a Tiled Correlation Plot
@@ -771,6 +744,77 @@ ggplot(corm, aes(Var2, Var1)) +
                         limit = c(-1, 1), name = "Correlation\n(Pearson)") +
    theme(axis.text.x = element_text(angle = 45, size = 11, vjust = 1, hjust = 1)) +
    coord_equal()
+```
+
+## Create a Contour Plot
+Contour plots are s nice way to display three-dimensional data by indicating die thresholds of values. Here, we are going to plot the dew point (i.e. [the temperature at which airborne water vapor will condense to form liquid dew](https://en.wikipedia.org/wiki/Dew_point)) related to temperature and ozone levels:
+
+```{r contour}
+## interpolate data
+library(akima)
+fld <- with(chic, interp(x = temp, y = o3, z = dewpoint))
+
+## prepare data in long format
+library(reshape2)
+df <- melt(fld$z, na.rm = T)
+names(df) <- c("x", "y", "Dewpoint")
+df$Temperature <- fld$x[df$x]
+df$Ozone <- fld$y[df$y]
+
+g <- ggplot(data = df, aes(x = Temperature, y = Ozone, z = Dewpoint)) +
+         theme(panel.background = element_rect(fill = "white"),
+               panel.border = element_rect(colour = "black", fill = NA),
+               legend.title = element_text(size = 15),
+               axis.text = element_text(size = 12),
+               axis.title.x = element_text(size = 15, vjust = -0.5),
+               axis.title.y = element_text(size = 15, vjust = 0.2),
+               legend.text = element_text(size = 12))
+         
+g + stat_contour(aes(colour = ..level.., fill = Dewpoint))
+```
+
+**Surprise!** As it is defined, the drew point is in most cases equal to the measured temperature.
+
+The lines are indicating different levels of drew points, but this is not a pretty plot. Let's try a tile plot with the `viridis` color palette:
+```{r contour-tile}
+g + geom_tile(aes(fill = Dewpoint)) +
+    scale_fill_viridis(option = "inferno")
+```
+
+How does it look if we combine contour and tile plot to fill in the area under the contour?
+```{r contour+tile}
+g + geom_tile(aes(fill = Dewpoint)) + 
+    stat_contour(colour = "white", size = 0.7, bins = 5) + 
+    scale_fill_viridis()
+```
+
+# Working with Ribbons (AUC, CI, etc.)
+This is not the perfect dataset for this, but using ribbon can be useful. In this example we will create a 30-day running average using the filter() function so that our ribbon is not too noisy.
+```{r default for ribbon, warning = F}
+chic$o3run <- as.numeric(filter(chic$o3, rep(1/30, 30), sides = 2))
+
+ggplot(chic, aes(date, o3run)) +
+   geom_line(color = "chocolate", lwd = 1) +
+   labs(x = "Year", y = "Temperature")
+```
+
+How does it look if we fill in the area below the curve using the `geom_ribbon()` function?
+```{r geom_ribbon AUC, warning = F}
+ggplot(chic, aes(date, o3run)) +
+   geom_ribbon(aes(ymin = 0, ymax = o3run), fill = "orange", color = "orange", alpha = 0.4) +
+   geom_line(color = "chocolate", lwd = 1) +
+   labs(x = "Year", y = "Temperature")
+```
+
+Nice to indicate the [area under the curve (AUC)](https://en.wikipedia.org/wiki/Area_under_the_curve_(pharmacokinetics)) but this is not really the conventional way to use `geom_ribbon()`. Instead, we draw a ribbon that gives us one standard deviation above and below our data:
+```{r geom_ribbon range, warning = F}
+chic$mino3 <- chic$o3run - sd(chic$o3run, na.rm = T)
+chic$maxo3 <- chic$o3run + sd(chic$o3run, na.rm = T)
+
+ggplot(chic, aes(date, o3run)) +
+   geom_ribbon(aes(ymin = mino3, ymax = maxo3), fill = "lightskyblue", color = "lightskyblue") +
+   geom_line(color = "royalblue4", lwd = 0.7) +
+   labs(x = "Year", y = "Temperature")
 ```
 
 # Working with Smoothings

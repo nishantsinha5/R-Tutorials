@@ -12,6 +12,7 @@
 #install.packages("grid")
 #install.packages("gridExtra")
 #install.packages("reshape2")
+#install.packages("akima")
 #install.packages("shiny")
 
 #### Load ggplot2 ####
@@ -382,18 +383,6 @@ ggplot(chic, aes(date, o3run)) +
    geom_line(color = "chocolate", lwd = 1) +
    labs(x = "Year", y = "Temperature")
 
-ggplot(chic, aes(date, o3run)) +
-   geom_ribbon(aes(ymin = 0, ymax = o3run), fill = "orange", color = "orange", alpha = 0.4) +
-   geom_line(color = "chocolate", lwd = 1) +
-   labs(x = "Year", y = "Temperature")
-
-chic$mino3 <- chic$o3run - sd(chic$o3run, na.rm = T)
-chic$maxo3 <- chic$o3run + sd(chic$o3run, na.rm = T)
-ggplot(chic, aes(date, o3run)) +
-   geom_ribbon(aes(ymin = mino3, ymax = maxo3), fill = "lightskyblue", color = "lightskyblue") +
-   geom_line(color = "royalblue4", lwd = .7) +
-   labs(x = "Year", y = "Temperature")
-
 corm <- round(cor(chic[ ,sort(c("death", "temp", "dewpoint", "pm10", "o3"))], method = "pearson", use = "pairwise.complete.obs"), 2)
 corm[lower.tri(corm)] <- NA
 corm
@@ -409,6 +398,43 @@ ggplot(corm, aes(Var2, Var1)) +
    scale_fill_gradient2(low = "blue", high = "red", mid = "white", midpoint = 0, limit = c(-1, 1), name = "Correlation\n(Pearson)") +
    theme(axis.text.x = element_text(angle = 45, size = 11, vjust = 1, hjust = 1)) +
    coord_equal()
+
+library(akima)
+fld <- with(chic, interp(x = temp, y = o3, z = dewpoint))
+library(reshape2)
+df <- melt(fld$z, na.rm = T)
+names(df) <- c("x", "y", "Dewpoint")
+df$Temperature <- fld$x[df$x]
+df$Ozone <- fld$y[df$y]
+g <- ggplot(data = df, aes(x = Temperature, y = Ozone, z = Dewpoint)) +
+   theme(panel.background = element_rect(fill = "white"),
+         panel.border = element_rect(colour = "black", fill = NA),
+         legend.title = element_text(size = 15),
+         axis.text = element_text(size = 12),
+         axis.title.x = element_text(size = 15, vjust = -0.5),
+         axis.title.y = element_text(size = 15, vjust = 0.2),
+         legend.text = element_text(size = 12))
+g + stat_contour(aes(colour = ..level.., fill = Dewpoint))
+
+g + geom_tile(aes(fill = Dewpoint)) +
+scale_fill_viridis(option = "inferno")
+
+g + geom_tile(aes(fill = Dewpoint)) + 
+stat_contour(colour = "white", size = 0.7, bins = 5) + 
+scale_fill_viridis()
+
+#### Working with Ribbons ####
+ggplot(chic, aes(date, o3run)) +
+   geom_ribbon(aes(ymin = 0, ymax = o3run), fill = "orange", color = "orange", alpha = 0.4) +
+   geom_line(color = "chocolate", lwd = 1) +
+   labs(x = "Year", y = "Temperature")
+
+chic$mino3 <- chic$o3run - sd(chic$o3run, na.rm = T)
+chic$maxo3 <- chic$o3run + sd(chic$o3run, na.rm = T)
+ggplot(chic, aes(date, o3run)) +
+   geom_ribbon(aes(ymin = mino3, ymax = maxo3), fill = "lightskyblue", color = "lightskyblue") +
+   geom_line(color = "royalblue4", lwd = .7) +
+   labs(x = "Year", y = "Temperature")
 
 #### Working with Smoothings ####
 ggplot(chic, aes(date, temp)) + 
@@ -438,4 +464,3 @@ ggplot(chic, aes(temp, death)) +
 #### Working with Interactive Graphs ####
 library(shiny)
 runExample("01_hello")
-
