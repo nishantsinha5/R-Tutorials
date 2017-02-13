@@ -24,3 +24,12 @@ NLMPY is a free python library to create spatial data from neutral landscape mod
 [html version](https://rawgit.com/Z3tt/R-Tutorials/master/rmarkdown_cheat_sheet/scientific_rmarkdown.html)
 
 A short instruction in how to use Markdown for scientific writing, with focus on rmarkdown and the usage in RStudio.
+
+## Shell script to setup an Ubuntu server with RStudio and shiny server
+
+[html version](https://rawgit.com/Z3tt/R-Tutorials/master/rmarkdown_cheat_sheet/scientific_rmarkdown.html)
+
+
+A short shell script to setup an Ubuntu server with RStudio and shiny server.
+It further installs all necessary software to use the tidyverse and most of the spatial R packages.
+If you use owncloud, it mounts your cloud into the servers filesystem.

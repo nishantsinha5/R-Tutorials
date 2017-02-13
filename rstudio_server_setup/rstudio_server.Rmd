@@ -42,7 +42,7 @@ If there are any questions, [feel free to ask](msciain@gwdg.de).
 1. Login as root
 1. Use `passwd` to change root password
 1. Create textfile with `nano server_setup.sh` and copy the shell script from the end of this entry into it
-  * Or download it: `wget https://download2.rstudio.org/rstudio-server-1.0.136-amd64.deb` 
+  * Or download it: `wget https://raw.githubusercontent.com/Z3tt/R-Tutorials/master/rstudio_server_setup/server_setup.sh` 
 1. Make the script executable with `chmod +x server_setup.sh`
 1. Run shell script (`./server_setup.sh`), which does the following for you:
   * Adds a local user with password
