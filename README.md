@@ -27,7 +27,7 @@ A short instruction in how to use Markdown for scientific writing, with focus on
 
 ## Shell script to setup an Ubuntu server with RStudio and shiny server
 
-[html version](https://rawgit.com/Z3tt/R-Tutorials/master/rmarkdown_cheat_sheet/scientific_rmarkdown.html)
+[html version](https://cdn.rawgit.com/Z3tt/R-Tutorials/41e6898b/rstudio_server_setup/rstudio_server.html)
 
 
 A short shell script to setup an Ubuntu server with RStudio and shiny server.
