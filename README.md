@@ -32,4 +32,4 @@ A short instruction in how to use Markdown for scientific writing, with focus on
 
 A short shell script to setup an Ubuntu server with RStudio and shiny server.
 It further installs all necessary software to use the tidyverse and most of the spatial R packages.
-If you use owncloud, it mounts your cloud into the servers filesystem.
+If you use owncloud, it mounts your cloud into the server's filesystem.
