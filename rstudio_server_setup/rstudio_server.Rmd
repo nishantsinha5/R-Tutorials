@@ -1,0 +1,190 @@
+---
+title: "Shell script to setup a server droplet with RStudio and shiny"
+author:
+  - name: Marco Sciaini, [spatialrecology.org](spatialrecology.org)
+    affiliation: Department of Ecosystem Modelling, University of Göttingen
+date: "`r Sys.Date()`"
+output:
+  tint::tintHtml: 
+     self_contained: TRUE
+     highlight: haddock
+     fig_caption: yes
+bibliography: bibliography.bib
+link-citations: yes
+---
+
+```{r setup, include=FALSE}
+library(tint)
+# invalidate cache when the package version changes
+knitr::opts_chunk$set(tidy = FALSE, cache.extra = packageVersion('tint'))
+options(htmltools.dir.version = FALSE)
+```
+# Setup your RStudio and shiny server
+
+Typing is hard, we all know it. That is probably why I shut myself multiple times out of my own server while using the command line. To avoid further annoyance, I wrote a small script to make my life easier - it sets up a fresh Ubuntu server with all necessary software for my research.
+
+This includes:
+- R + RStudio
+- Shiny to deliver GUI for my modelling stuff
+- Owncloud to have my data everywhere I need it
+- Something to monitor the IT infrastructure ([glances](https://nicolargo.github.io/glances/))
+
+This setup is probably quite common (with slight deviations), this is why I want to share the script.
+If there are any questions, [feel free to ask](msciain@gwdg.de). 
+
+## Requirements
+
+* Ubuntu 16.04
+
+## Steps to follow
+
+1. Connect to your server: `ssh 'root@server-ip' -p 22`
+1. Login as root
+1. Use `passwd` to change root password
+1. Create textfile with `nano server_setup.sh` and copy the shell script from the end of this entry into it
+  * Or download it: `wget https://download2.rstudio.org/rstudio-server-1.0.136-amd64.deb` 
+1. Make the script executable with `chmod +x server_setup.sh`
+1. Run shell script (`./server_setup.sh`), which does the following for you:
+  * Adds a local user with password
+  * Enables all ubuntu repositories (includung CRAN-RStudio, ubuntugis-unstable)
+  * Installs newest version of R
+  * Installs RStudio and Shiny Server
+  * Mounts your owncloudfolder into the servers filesystem
+1. Delete shell script (`rm server_setup.sh`)
+1. Add ssh key from local machine ([follow this link](https://www.digitalocean.com/community/tutorials/initial-server-setup-with-ubuntu-16-04))
+1. Open these ports:
+  * **8787** (RStudio server), 
+  * **3838** (shiny server),
+  * **61208**(glances)
+1. Enter the URL http://<server-ip>:8787 in your browser to use RStudio
+1. Enter the URL http://<server-ip>:3838 to see an overview of your shiny applets
+1. Enter the URL http://<server-ip>:61208 in browser to watch glances
+  * Using your command line, just type in `glances` 
+
+```{r, engine = 'bash', eval = FALSE}
+#!/bin/bash
+
+## Variables
+# USERNAME: username for your own local user
+# USERPASSWORD: password for local user
+# OWNCLOUDUSERNAME: Username for your owncloudservice
+# OWNCLOUDPASSWORD: Password for your owncloudservice
+# OWNCLOUDWEBDAV: WebDAV address for your owncloudservice
+USERNAME="xxx"
+USERPASSWORD="xxx"
+OWNCLOUDUSERNAME="xxx"
+OWNCLOUDPASSWORD="xxx"
+OWNCLOUDWEBDAV="xxx"
+
+# add local user
+adduser $USERNAME --disabled-password --gecos ""
+echo -e "$USERPASSWORD\n$USERPASSWORD\n" | passwd $USERNAME
+usermod -aG sudo $USERNAME
+
+# Enable sources, add PPAs and update sources:
+add-apt-repository "deb http://archive.ubuntu.com/ubuntu $(lsb_release -sc) main universe restricted multiverse"
+
+# Add repository for R
+add-apt-repository "deb http://cran.rstudio.com/bin/linux/ubuntu xenial/" 
+
+# Add repository for GIS software
+add-apt-repository ppa:ubuntugis/ubuntugis-unstable
+
+
+# Fetch keys for R repository
+gpg --keyserver keyserver.ubuntu.com --recv-key E084DAB9
+gpg -a --export E084DAB9 | apt-key add -
+
+# Update and upgrade everything
+export DEBIAN_FRONTEND=noninteractive
+apt-get update
+apt-get -o Dpkg::Options::="--force-confnew" --force-yes -fuy dist-upgrade
+
+# Symlinking home folders.
+cd
+mkdir Downloads/ Data/ Share/
+
+## Adding software:
+# some dependencies for R packages and the following software
+apt-get install -y --force-yes r-base r-base-dev gdebi-core davfs2 libgdal-dev libproj-dev
+
+## Download RStudio and shiny server (check links for newer versions)
+# 1. https://www.rstudio.com/products/shiny/download-server/
+# 2. https://www.rstudio.com/products/rstudio/download-server/
+cd Downloads/
+wget https://download2.rstudio.org/rstudio-server-1.0.136-amd64.deb
+wget https://download3.rstudio.org/ubuntu-12.04/x86_64/shiny-server-1.5.1.834-amd64.deb
+
+# Install both
+gdebi --non-interactive rstudio-server-1.0.136-amd64.deb
+sudo su - \
+-c "R -e \"install.packages('shiny', repos='https://cran.rstudio.com/')\""
+gdebi --non-interactive shiny-server-1.5.1.834-amd64.deb
+cd
+
+# mount owncloud via webdav
+usermod -aG davfs2 $USERNAME
+mkdir /home/$USERNAME/owncloud
+mkdir /home/$USERNAME/.davfs2
+cp  /etc/davfs2/secrets /home/$USERNAME/.davfs2/secrets
+chown $USERNAME:$USERNAME  /home/$USERNAME/.davfs2/secrets
+chmod 600 /home/$USERNAME/.davfs2/secrets
+sed -i '/user config file only/s/^#//g' /etc/davfs2/davfs2.conf
+echo "https://$OWNCLOUDWEBDAV/remote.php/webdav/ $OWNCLOUDUSERNAME $OWNCLOUDPASSWORD" >> /home/$USERNAME/.davfs2/secrets
+echo "https://$OWNCLOUDWEBDAV/remote.php/webdav/ /home/$USERNAME/owncloud davfs user,rw,auto 0 0" >> /etc/fstab
+mount /home/$USERNAME/owncloud
+chown $USERNAME:$USERNAME -R /home/$USERNAME/owncloud
+
+## setup glances to monitor server
+# https://github.com/nicolargo/glances
+wget -O- https://bit.ly/glances | /bin/bash
+
+echo -e "[Unit]
+Description=Glances
+
+[Service]
+ExecStart=/usr/local/bin/glances -w -0 --time 30
+Restart=on-abort
+
+[Install]
+WantedBy=multi-user.target" >  /etc/systemd/system/glances.service
+
+systemctl enable glances.service
+systemctl start glances.service
+
+## Install R packages
+# tidyverse, rvest, rgdal, raster, rasterVis, viridis, spatial.tools, doParallel, SDMTools, PythoninR
+sudo su - \
+-c "R -e \"install.packages('rvest', repos='https://cran.rstudio.com/')\""
+sudo su - \
+-c "R -e \"install.packages('tidyverse', repos='https://cran.rstudio.com/')\""
+sudo su - \
+-c "R -e \"install.packages('rgdal', repos='https://cran.rstudio.com/')\""
+sudo su - \
+-c "R -e \"install.packages('raster', repos='https://cran.rstudio.com/')\""
+sudo su - \
+-c "R -e \"install.packages('rasterVis', repos='https://cran.rstudio.com/')\""
+sudo su - \
+-c "R -e \"install.packages('viridis', repos='https://cran.rstudio.com/')\""
+sudo su - \
+-c "R -e \"install.packages('spatial.tools', repos='https://cran.rstudio.com/')\""
+sudo su - \
+-c "R -e \"install.packages('doParallel', repos='https://cran.rstudio.com/')\""
+sudo su - \
+-c "R -e \"install.packages('SDMTools', repos='https://cran.rstudio.com/')\""
+sudo su - \
+-c "R -e \"install.packages('PythonInR', repos='https://cran.rstudio.com/')\""
+
+# create swap space
+fallocate -l 16G /swapfile
+chmod 600 /swapfile
+mkswap /swapfile
+swapon /swapfile
+cp /etc/fstab /etc/fstab.bak
+echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
+
+# Update and upgrade everything
+apt-get update
+apt-get -y --force-yes upgrade
+
+```
