@@ -11,6 +11,8 @@
 #install.packages("extrafont")
 #install.packages("grid")
 #install.packages("gridExtra")
+#install.packages("tidyverse")
+#install.packages("ggrepel")
 #install.packages("reshape2")
 #install.packages("akima")
 #install.packages("shiny")
@@ -24,17 +26,14 @@ str(chic)
 head(chic, 10)
 
 #### A Default ggplot ####
-g <- ggplot(chic, aes(date, temp))
-g
+(g <- ggplot(chic, aes(date, temp)))
 
 g + geom_point()
 
-g <- g + geom_point(color = "firebrick")
-g
+(g <- g + geom_point(color = "firebrick"))
 
 #### Working with Axes ####
-g <- g + labs(x = "Date", y = expression(paste("Temperature (", degree ~ F, ")")))
-g
+(g <- g + labs(x = "Date", y = expression(paste("Temperature (", degree ~ F, ")"))))
 
 g + theme(axis.ticks.y = element_blank(), axis.text.y = element_blank())
 
@@ -57,31 +56,33 @@ ggplot(chic, aes(date, temp)) +
    scale_y_continuous(label = function(x) {return(paste(x, "Degrees Fahrenheit"))}) 
 
 #### Working with Titles ####
-g <- g + ggtitle("Temperatures in Chicago")  ## or g + labs("Temperatures in Chicago")
-g
+(g <- g + ggtitle("Temperatures in Chicago"))
 
-g + theme(plot.title = element_text(size = 20, face = "bold", margin = margin(10, 0, 10, 0)))
+g + labs(title = "Temperatures in Chicago", 
+         subtitle = "Seasonal pattern of daily temperatures from 1997 to 2001", 
+         caption = "Data from NMMAPS")
 
-g + theme(plot.title = element_text(size = 15, face = 4, hjust = 0))
+g + theme(plot.title = element_text(size = 15, face = "bold", margin = margin(10, 0, 10, 0)))
+
+g + theme(plot.title = element_text(size = 15, face = 4, hjust = 1))
 
 library(extrafont)
 font_import()
 loadfonts(device = "win")
 fonts()  ## fonttable()
-g + theme(plot.title = element_text(size = 20, family = "Merriweather"))
+g + theme(plot.title = element_text(size = 18, family = "Times New Roman"))
 
 g + ggtitle("Temperatures in Chicago\nfrom 1997 to 2001") + 
-         theme(plot.title = element_text(size = 20, face = "bold", vjust = 1, lineheight = 0.6))
+         theme(plot.title = element_text(size = 15, face = "bold", vjust = 1, lineheight = 0.6))
 
 #### Working with Legends ####
-ggplot(chic, aes(date, temp, color = factor(season))) +
+(g <- ggplot(chic, aes(date, temp, color = factor(season))) +
    geom_point() +
-   labs(x = "Year", y = "Temperature")
+   labs(x = "Year", y = "Temperature"))
+
+g + theme(legend.position = "none")
 
 chic$season <- factor(chic$season, levels = c("Spring", "Summer", "Autumn", "Winter"))
-g <- ggplot(chic, aes(date, temp, color = factor(season))) +
-   geom_point() +
-   labs(x = "Year", y = "Temperature")
 g
 
 g + theme(legend.title = element_blank())
@@ -342,7 +343,41 @@ ggplot(chic, aes(date, temp, color = factor(season))) +
          legend.key = element_rect(fill = "grey70")) +
    scale_color_viridis(discrete = T)
 
-#### Working with Annotations ####
+#### Working with Text ####
+set.seed(2017)
+library(tidyverse)
+sample <- chic %>% group_by(season) %>% sample_frac(0.01)
+# base R code: sample <- sample_frac(group_by(chic, season), 0.01)
+
+ggplot(sample, aes(date, temp, label = season)) +
+   geom_point() + 
+   geom_text(aes(colour = factor(temp)), hjust = 0.5, vjust = -0.5) +
+   labs(x = "Year", y = "Temperature") +
+   xlim(as.Date(c('1997-01-01', '2000-12-31'))) + ylim(c(0, 90)) +
+   theme(legend.position = "none")
+
+ggplot(sample, aes(date, temp, label = season)) +
+   geom_point() + 
+   geom_label(aes(fill = factor(temp)), colour = "white", fontface = "bold", hjust = 0.5, vjust = -0.25) +
+   labs(x = "Year", y = "Temperature") +
+   xlim(as.Date(c('1997-01-01', '2000-12-31'))) + ylim(c(0, 90)) +
+   theme(legend.position = "none")
+
+library(ggrepel)
+ggplot(sample, aes(date, temp, label = season)) +
+   geom_point() + 
+   geom_text_repel(aes(colour = factor(temp)), size = 2.5) +
+   labs(x = "Year", y = "Temperature") +
+   xlim(as.Date(c('1997-01-01', '2000-12-31'))) + ylim(c(0, 90)) +
+   theme(legend.position = "none")
+
+ggplot(chic, aes(date, temp, label = season)) +
+   geom_point() +
+   geom_point(data = sample, aes(color = factor(temp)), size = 2.5) +
+   geom_label_repel(data = sample, aes(fill = factor(temp)), colour = "white", fontface = "bold") +
+   labs(x = "Year", y = "Temperature") +
+   theme(legend.position = "none")
+
 library(grid)
 my_grob = grobTree(textGrob("This text stays in place!", x = 0.1, y = 0.95, hjust = 0, 
                             gp = gpar(col = "blue", fontsize = 15, fontface = "italic")))
@@ -378,7 +413,7 @@ g + geom_violin(color = "gray", alpha = 0.5) +
    theme(legend.title = element_blank()) +
    coord_flip()
 
-chic$o3run <- as.numeric(filter(chic$o3, rep(1/30, 30), sides = 2))
+chic$o3run <- as.numeric(stats::filter(chic$o3, rep(1/30, 30), sides = 2))
 ggplot(chic, aes(date, o3run)) +
    geom_line(color = "chocolate", lwd = 1) +
    labs(x = "Year", y = "Temperature")
