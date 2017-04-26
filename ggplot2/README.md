@@ -13,6 +13,8 @@ Major changes were made:
 * to have an executable R script for exercises and workshops,
 * to include additional tipps on e.g:
    + how and why to use the `Viridis` color palettes,
+   + how to add different types of labels,
    + how to adjust the plot title,
    + how to change the order in a legend and legend key names,
-   + `shiny` as package for interactive plots.
+   + `shiny` as package for interactive plots,
+   + remarks and tipps.
