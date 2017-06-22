@@ -35,14 +35,26 @@ g + geom_point()
 #### Working with Axes ####
 (g <- g + labs(x = "Date", y = expression(paste("Temperature (", degree ~ F, ")"))))
 
+g + theme(axis.title.x = element_text(color = "sienna", size = 15, vjust = -0.35),
+          axis.title.y = element_text(color = "orangered", size = 15, vjust = 0.35))
+
 g + theme(axis.ticks.y = element_blank(), axis.text.y = element_blank())
 
 g + theme(axis.text.x = element_text(angle = 50, size = 16, vjust = 0.5))
 
-g + theme(axis.title.x = element_text(color = "sienna", size = 15, vjust = -0.35),
-          axis.title.y = element_text(color = "orangered", size = 15, vjust = 0.35))
-
 g + ylim(c(0, 50))
+
+library(tidyverse)
+chic_red <- filter(chic, temp > 25, o3 > 20)
+ggplot(chic_red, aes(temp, o3)) + 
+  geom_point() + 
+  labs(x = expression(paste("Temperature higher than 25 ", degree ~ F, "")), y = "Ozone higher than 20 ppb") +
+  expand_limits(x = 0, y = 0)
+
+ggplot(chic_red, aes(temp, o3)) + 
+  geom_point() + 
+  labs(x = expression(paste("Temperature higher than 25 ", degree ~ F, "")), y = "Ozone higher than 20 ppb") +
+  coord_cartesian(xlim = c(0, max(chic_red$temp)), ylim = c(0, max(chic_red$o3)))
 
 ggplot(chic, aes(temp, temp + rnorm(nrow(chic), sd = 20))) +
    geom_point() +
@@ -77,13 +89,15 @@ g + ggtitle("Temperatures in Chicago\nfrom 1997 to 2001") +
 
 #### Working with Legends ####
 (g <- ggplot(chic, aes(date, temp, color = factor(season))) +
-   geom_point() +
-   labs(x = "Year", y = "Temperature"))
+        geom_point() +
+        labs(x = "Year", y = "Temperature"))
 
 g + theme(legend.position = "none")
 
 chic$season <- factor(chic$season, levels = c("Spring", "Summer", "Autumn", "Winter"))
-g
+(g <- ggplot(chic, aes(date, temp, color = factor(season))) +
+        geom_point() +
+        labs(x = "Year", y = "Temperature"))
 
 g + theme(legend.title = element_blank())
 
@@ -104,13 +118,13 @@ g + theme(legend.key = element_rect(fill = NA),
     scale_color_discrete("Seasons:") +
     guides(color = guide_legend(override.aes = list(size = 6)))
 
-g + geom_text(data = chic, aes(date, temp, label = round(temp)), size = 4) +
-    theme(legend.title = element_text(colour = "chocolate", size = 14, face = "bold")) +
-    scale_color_discrete("Seasons")
-
-g + geom_text(data = chic, aes(date, temp, label = round(temp), size = 4), show.legend = F) +
-    theme(legend.title = element_text(colour = "chocolate", size = 14, face = "bold")) +
+g + geom_rug() +
+    theme(legend.title = element_text(colour = "chocolate", size = 14, face = 2)) +
     scale_color_discrete("Seasons:")
+
+g + geom_rug(show.legend = F) +
+   theme(legend.title = element_text(colour = "chocolate", size = 14, face = 2)) +
+   scale_color_discrete("Seasons:")
 
 ggplot(chic, aes(x = date, y = o3)) +
    geom_line(color = "grey") +
@@ -137,45 +151,31 @@ ggplot(chic, aes(x = date, y = o3)) +
    guides(colour = guide_legend(override.aes = list(linetype = c(1, 0), shape = c(NA, 16))))
 
 #### Working with Backgrounds ####
-ggplot(chic, aes(date, temp)) +
-   geom_point(color = "firebrick") +
-   labs(x = "Year", y = "Temperature") +
-   theme(panel.background = element_rect(fill = "grey60"))
+(g <- ggplot(chic, aes(date, temp)) +
+         geom_point(color = "firebrick") +
+         labs(x = "Year", y = "Temperature") +
+         theme(panel.background = element_rect(fill = "white")))
 
-ggplot(chic, aes(date, temp)) +
-   geom_point(color = "firebrick") +
-   labs(x = "Year", y = "Temperature") +
-   theme(panel.background = element_rect(fill = "grey60"),
-         panel.grid.major = element_line(colour = "orange", size = 1.5),
-         panel.grid.minor = element_line(colour = "indianred"))
+(g <- g + theme(panel.grid.major = element_line(colour = "grey20", size = 0.5),
+                panel.grid.minor = element_line(colour = "grey80", size = 0.25)))
 
-ggplot(chic, aes(date, temp)) +
-   geom_point(color = "firebrick") +
-   labs(x = "Year", y = "Temperature") +
-   theme(plot.background = element_rect(fill = "grey60"))
+g + scale_y_continuous(breaks = seq(0, 100, 10), minor_breaks = seq(0, 100, 2.5))
+
+g + theme(plot.background = element_rect(fill = "grey60"))
 
 #### Working with Margins ####
-ggplot(chic, aes(date, temp)) +
-   geom_point(color = "chocolate") +
-   labs(x = "Year", y = "Temperature") +
-   theme(plot.background = element_rect(fill = "grey60"),
-         plot.margin = unit(c(1, 5, 1, 5), "cm"))  ## top, right, bottom, left
+g + theme(plot.background = element_rect(fill = "grey60"),
+          plot.margin = unit(c(1, 5, 1, 5), "cm"))  ## top, right, bottom, left
 
 #### Working with Multi-Panel Plots ####
-ggplot(chic, aes(date, temp)) +
+g <- ggplot(chic, aes(date, temp)) +
    geom_point(color = "chartreuse4") +
-   labs(x = "Year", y = "Temperature") +
-   facet_wrap(~year, nrow = 1)
+   labs(x = "Year", y = "Temperature")
+g + facet_wrap(~year, nrow = 1)
 
-ggplot(chic, aes(date, temp)) +
-   geom_point(color = "chartreuse4") +
-   labs(x = "Year", y = "Temperature") +
-   facet_wrap(~year, nrow = 2)
+g + facet_wrap(~year, nrow = 2)
 
-ggplot(chic, aes(date, temp)) +
-   geom_point(color = "chartreuse4") +
-   labs(x = "Year", y = "Temperature") +
-   facet_wrap(~year, nrow = 2, scales = "free")
+g + facet_wrap(~year, nrow = 2, scales = "free")
 
 ggplot(chic, aes(date, temp)) +
    geom_point(color = "orangered") +
@@ -216,12 +216,14 @@ ggplot(chic, aes(date, temp, color = factor(season))) +
 
 set.seed(2017)
 chic.red <- chic[sample(nrow(chic), 50), ]
-ggplot(chic.red, aes(temp, o3)) +
-   geom_point() +
-   labs(x = "Temperature", y = "Ozone") + 
-   ggtitle("Temperature and Ozone Levels in Chicago") +
-   theme_tufte() +
-   stat_smooth(method = "lm", col = "black", size = 0.7, fill = "gray60", alpha = 0.2)
+(t <- ggplot(chic.red, aes(temp, o3)) +
+      geom_point() +
+      labs(x = "Temperature", y = "Ozone") + 
+      ggtitle("Temperature and Ozone Levels in Chicago") +
+      theme_tufte() +
+      stat_smooth(method = "lm", col = "black", size = 0.7, fill = "gray60", alpha = 0.2))
+
+t + geom_rangeframe()
   
 theme_set(theme_gray(base_size = 30))
 ggplot(chic, aes(date, temp, color = factor(season))) + 
@@ -231,62 +233,70 @@ ggplot(chic, aes(date, temp, color = factor(season))) +
 
 theme_gray
 
-theme_gray.mod <- function (base_size = 12, base_family = "") 
-{
-   half_line <- base_size/2
-   theme(line = element_line(colour = "black", size = 0.5, linetype = 1, lineend = "butt"), 
-         rect = element_rect(fill = "white", colour = "black", size = 0.5, linetype = 1), 
-         text = element_text(family = base_family, face = "plain", colour = "black", size = base_size, 
-                             lineheight = 0.9, hjust = 0.5, vjust = 0.5, angle = 0, margin = margin(), debug = FALSE), 
-         axis.line = element_line(), 
-         axis.line.x = element_blank(), 
-         axis.line.y = element_blank(), axis.text = element_text(size = rel(0.8), colour = "grey30"), 
-         
-         ## modified aesthetics of axes texts, ticks and titles
-         axis.text.x = element_text(margin = margin(t = 0.8 * half_line/2), vjust = 1, size = 12, face = "bold"),
-         axis.text.y = element_text(margin = margin(r = 0.8 * half_line/2), hjust = 1, size = 12, face = "bold"),
-         axis.ticks = element_line(colour = "darkorange", size = 1.2),
-         axis.ticks.length = unit(half_line, "pt"),
-         axis.title.x = element_text(margin = margin(t = 0.8 * half_line, b = 0.8 * half_line/2), size = 15),
-         axis.title.y = element_text(angle = 90, margin = margin(r = 0.8 * half_line, l = 0.8 * half_line/2), size = 15),
-         
-         legend.background = element_rect(colour = NA), 
-         legend.margin = unit(0.2, "cm"), 
-         legend.key = element_rect(fill = "grey95", colour = "white"), 
-         legend.key.size = unit(1.2, "lines"), 
-         legend.key.height = NULL, 
-         legend.key.width = NULL, 
-         legend.text = element_text(size = rel(0.8)), 
-         legend.text.align = NULL, 
-         legend.title = element_text(hjust = 0), 
-         legend.title.align = NULL, 
-         legend.position = "right", 
-         legend.direction = NULL, 
-         legend.justification = "center", 
-         legend.box = NULL, 
-         
-         ## modified aesthetics of the panel and grid
-         panel.background = element_rect(fill = "white", colour = NA),
-         panel.border = element_rect(colour = "black", fill = NA, size = 1.2),
-         panel.grid.major = element_line(colour = "darkorange", size = 1.2),
-         panel.grid.minor = element_line(colour = "darkorange", size = 0.1),
-         
-         panel.margin = unit(half_line, "pt"), 
-         panel.margin.x = NULL, 
-         panel.margin.y = NULL, 
-         panel.ontop = FALSE, 
-         strip.background = element_rect(fill = "grey85", colour = NA), 
-         strip.text = element_text(colour = "grey10", size = rel(0.8)),
-         strip.text.x = element_text(margin = margin(t = half_line, b = half_line)), 
-         strip.text.y = element_text(angle = -90, 
-                                     margin = margin(l = half_line, r = half_line)), 
-         strip.switch.pad.grid = unit(0.1, "cm"), 
-         strip.switch.pad.wrap = unit(0.1, "cm"), 
-         plot.background = element_rect(colour = "white"), 
-         plot.title = element_text(size = rel(1.2), margin = margin(b = half_line * 1.2)), 
-         plot.margin = margin(half_line, half_line, half_line, half_line), 
-         complete = TRUE)
+theme_gray.mod <- function (base_size = 12, base_family = "") {
+  half_line <- base_size/2
+  theme(line = element_line(colour = "black", size = 0.5, linetype = 1, lineend = "butt"), 
+        rect = element_rect(fill = "white", colour = "black", size = 0.5, linetype = 1), 
+        text = element_text(family = base_family, face = "plain", colour = "black", size = base_size, lineheight = 0.9, 
+                            hjust = 0.5, vjust = 0.5, angle = 0, margin = margin(), debug = F), 
+        axis.line = element_blank(), 
+        axis.line.x = NULL, 
+        axis.line.y = NULL, 
+        axis.text = element_text(size = base_size * 1.1, colour = "black"), 
+        axis.text.x = element_text(margin = margin(t = 0.8 * half_line/2), vjust = 1), 
+        axis.text.x.top = element_text(margin = margin(b = 0.8 * half_line/2), vjust = 0), 
+        axis.text.y = element_text(margin = margin(r = 0.8 * half_line/2), hjust = 1), 
+        axis.text.y.right = element_text(margin = margin(l = 0.8 * half_line/2), hjust = 0), 
+        axis.ticks = element_line(colour = "black", size = 1), 
+        axis.ticks.length = unit(half_line, "pt"), 
+        axis.title.x = element_text(margin = margin(t = half_line), vjust = 1, size = base_size * 1.3, face = "bold"), 
+        axis.title.x.top = element_text(margin = margin(b = half_line), vjust = 0), 
+        axis.title.y = element_text(angle = 90, margin = margin(r = half_line), vjust = 1, size = base_size * 1.3, face = "bold"), 
+        axis.title.y.right = element_text(angle = -90, margin = margin(l = half_line), vjust = 0), 
+        legend.background = element_rect(colour = NA), 
+        legend.spacing = unit(0.4, "cm"), 
+        legend.spacing.x = NULL, 
+        legend.spacing.y = NULL, 
+        legend.margin = margin(0.2, 0.2, 0.2, 0.2, "cm"), 
+        legend.key = element_rect(fill = "grey95", colour = "white"), 
+        legend.key.size = unit(1.2, "lines"), 
+        legend.key.height = NULL, 
+        legend.key.width = NULL, 
+        legend.text = element_text(size = rel(0.8)), 
+        legend.text.align = NULL, 
+        legend.title = element_text(hjust = 0), 
+        legend.title.align = NULL, 
+        legend.position = "right", 
+        legend.direction = NULL, 
+        legend.justification = "center", 
+        legend.box = NULL, 
+        legend.box.margin = margin(0, 0, 0, 0, "cm"), 
+        legend.box.background = element_blank(), 
+        legend.box.spacing = unit(0.4, "cm"), 
+        panel.background = element_rect(fill = "white", colour = NA),
+        panel.border = element_rect(colour = "black", fill = NA, size = 2),
+        panel.grid.major = element_line(colour = "grey80", size = 1.2),
+        panel.grid.minor = element_line(colour = "grey80", size = 0.1),
+        panel.spacing = unit(base_size, "pt"), 
+        panel.spacing.x = NULL, 
+        panel.spacing.y = NULL, 
+        panel.ontop = F, 
+        strip.background = element_rect(fill = "white", colour = "black"), 
+        strip.text = element_text(colour = "black", size = base_size), 
+        strip.text.x = element_text(margin = margin(t = half_line, b = half_line)), 
+        strip.text.y = element_text(angle = -90, margin = margin(l = half_line, r = half_line)), 
+        strip.placement = "inside", 
+        strip.placement.x = NULL, 
+        strip.placement.y = NULL, 
+        strip.switch.pad.grid = unit(0.1, "cm"), 
+        strip.switch.pad.wrap = unit(0.1, "cm"), 
+        plot.background = element_rect(colour = NA), 
+        plot.title = element_text(size = base_size * 1.8, hjust = 0.5, vjust = 1, face = "bold", margin = margin(b = half_line * 1.2)), 
+        plot.subtitle = element_text(size = base_size * 1.3, hjust = 0.5, vjust = 1, margin = margin(b = half_line * 0.9)), 
+        plot.caption = element_text(size = rel(0.9), hjust = 1, vjust = 1, margin = margin(t = half_line * 0.9)), 
+        plot.margin = margin(base_size, base_size, base_size, base_size), complete = T)
 }
+
 theme_set(theme_gray.mod())
 
 ggplot(chic, aes(date, temp, color = factor(season))) + 
@@ -300,12 +310,11 @@ theme_set(theme_gray())
 
 #### Working with Colors ####
 ## categorial variables
-g <- ggplot(chic, aes(date, temp, color = factor(season))) +
+(g <- ggplot(chic, aes(date, temp, color = factor(season))) +
          geom_point() + 
          labs(x = "Year", y = "Temperature") +
          theme(legend.title = element_blank()) +
-         scale_color_manual(values = c("dodgerblue4", "darkolivegreen4", "darkorchid3", "goldenrod1"))
-g
+         scale_color_manual(values = c("dodgerblue4", "darkolivegreen4", "darkorchid3", "goldenrod1")))
 
 g + scale_color_brewer(palette = "Set1")
 
@@ -313,15 +322,14 @@ library(ggthemes)
 g + scale_color_tableau()
 
 ## continiuous variables
-g <- ggplot(chic, aes(date, temp, color = o3)) + 
+(g <- ggplot(chic, aes(date, temp, color = o3)) + 
          geom_point() + 
          labs(x = "Year", y = "Temperature") + 
-         scale_color_continuous("Ozone:")
-g
+         scale_color_continuous("Ozone:"))
 
-#ggplot(chic, aes(date, temp, color = o3)) +  
-#   geom_point() + labs(x = "Year", y = "Ozone") +
-#   scale_color_gradient()
+ggplot(chic, aes(date, temp, color = o3)) +  
+   geom_point() + labs(x = "Year", y = "Ozone") +
+   scale_color_gradient()
 
 g + scale_color_gradient(low = "darkkhaki", high = "darkgreen", "Ozone:")
 
@@ -342,6 +350,22 @@ ggplot(chic, aes(date, temp, color = factor(season))) +
          panel.background = element_rect(fill = "grey70"), 
          legend.key = element_rect(fill = "grey70")) +
    scale_color_viridis(discrete = T)
+
+#### Working with Lines ####
+g + geom_hline(yintercept = c(20, 73))
+
+ggplot(chic, aes(temp, o3)) +
+   geom_point() +
+   labs(x = "Temperature", y = "Ozone") + 
+   geom_vline(xintercept = quantile(chic$temp)[4], linetype = 2, color = "firebrick", size = 1.5) +
+   geom_hline(yintercept = quantile(chic$o3)[4], linetype = 2, color = "firebrick", size = 1.5)
+
+reg <- lm(o3 ~ temp, data = chic)
+ggplot(chic, aes(temp, o3)) +
+   geom_point() +
+   labs(caption = paste0("y = ", round(coefficients(reg)[2], 2), " * x + ", round(coefficients(reg)[1], 2)), 
+        x = "Temperature", y = "Ozone") + 
+   geom_abline(intercept = coefficients(reg)[1], slope = coefficients(reg)[2], color = "darkorange1", size = 1.5)
 
 #### Working with Text ####
 set.seed(2017)
@@ -412,6 +436,12 @@ g + geom_violin(color = "gray", alpha = 0.5) +
    geom_jitter(aes(color = season), position = position_jitter(width = 0.3), alpha = 0.3) +
    theme(legend.title = element_blank()) +
    coord_flip()
+
+ggplot(chic, aes(date, temp, color = factor(season))) +
+   geom_point() +
+   geom_rug() +
+   labs(x = "Year", y = "Temperature") +
+   theme(legend.position = "none")
 
 chic$o3run <- as.numeric(stats::filter(chic$o3, rep(1/30, 30), sides = 2))
 ggplot(chic, aes(date, o3run)) +
@@ -499,3 +529,10 @@ ggplot(chic, aes(temp, death)) +
 #### Working with Interactive Graphs ####
 library(shiny)
 runExample("01_hello")
+# shiny homepage: http://shiny.rstudio.com/
+
+# plot.ly homepage: https://plot.ly/feed
+
+#### Tipps & Tricks
+# shiny app for learning ggplot2: http://databall.co/shiny/shinyggplot/?utm_source=r-bloggers.com&utm_medium=referral&utm_campaign=blogpost&utm_content=pic
+
