@@ -24,8 +24,8 @@ link-citations: yes
 ---
 
 ```{r set options, echo = F, cache = F}
-options(width = 500)
-knitr::opts_chunk$set(cache = F)
+options(width = 700)
+knitr::opts_chunk$set(cache = F, out.width = "100%")
 docache <- F  ## set FALSE to re-run GAM smoothings
 ```
 
