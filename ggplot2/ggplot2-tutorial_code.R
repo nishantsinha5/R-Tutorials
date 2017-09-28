@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------------#
-# A ggplot2 tutorial based on                                                         #
+# A ggplot2 overview based on                                                         #
 # http://zevross.com/blog/2014/08/04/beautiful-plotting-in-r-a-ggplot2-cheatsheet-3/) #
 #-------------------------------------------------------------------------------------#
 # Cedric Scherer (scherer@izw-berlin.de), 13. January 2017                            #
@@ -15,6 +15,7 @@
 #install.packages("ggrepel")
 #install.packages("reshape2")
 #install.packages("akima")
+#install.packages("ggridges")
 #install.packages("shiny")
 
 #### Load ggplot2 ####
@@ -44,12 +45,13 @@ g + theme(axis.text.x = element_text(angle = 50, size = 16, vjust = 0.5))
 
 g + ylim(c(0, 50))
 
-library(tidyverse)
-chic_red <- filter(chic, temp > 25, o3 > 20)
-ggplot(chic_red, aes(temp, o3)) + 
-  geom_point() + 
-  labs(x = expression(paste("Temperature higher than 25 ", degree ~ F, "")), y = "Ozone higher than 20 ppb") +
-  expand_limits(x = 0, y = 0)
+chic %>% 
+  filter(temp > 25, o3 > 20) %>% 
+  ggplot(aes(temp, o3)) + 
+    geom_point() + 
+    labs(x = expression(paste("Temperature higher than 25 ", degree ~ F, "")), 
+         y = "Ozone higher than 20 ppb") +
+    expand_limits(x = 0, y = 0)
 
 ggplot(chic_red, aes(temp, o3)) + 
   geom_point() + 
@@ -420,6 +422,11 @@ ggplot(chic, aes(x = season, y = o3)) +
    labs(x = "Season", y = "Ozone") +
    coord_flip()
 
+g + scale_y_reverse()
+
+g + scale_y_log10(lim = c(0.1, 100)) +
+   labs(x = "log(Temperature)", y = "Year")
+
 #### Working with Plot Types ####
 g <- ggplot(chic, aes(x = season, y = o3)) + 
          labs(x = "Season", y = "Ozone")
@@ -482,11 +489,47 @@ g <- ggplot(data = df, aes(x = Temperature, y = Ozone, z = Dewpoint)) +
 g + stat_contour(aes(colour = ..level.., fill = Dewpoint))
 
 g + geom_tile(aes(fill = Dewpoint)) +
-scale_fill_viridis(option = "inferno")
+      scale_fill_viridis(option = "inferno")
 
 g + geom_tile(aes(fill = Dewpoint)) + 
-stat_contour(colour = "white", size = 0.7, bins = 5) + 
-scale_fill_viridis()
+      stat_contour(colour = "white", size = 0.7, bins = 5) + 
+      scale_fill_viridis()
+
+library(ggridges)
+ggplot(chic, aes(temp, year)) + 
+  geom_density_ridges(fill = "grey90") +
+  labs(x = "Temperature [F]", y = "Year")
+
+ggplot(chic, aes(temp, year, fill = year)) + 
+  geom_density_ridges(alpha = 0.8, color = "white", scale = 2.5, rel_min_height = 0.01) + 
+  labs(x = "Temperature [F]", y = "Year") + 
+  guides(fill = F) +
+  theme_ridges()
+
+ggplot(chic, aes(x = temp, y = season, fill = ..x..)) + 
+  geom_density_ridges_gradient(scale = 0.9, gradient_lwd = 0.5, color = "black") + 
+  theme_ridges(grid = F) +
+  scale_fill_viridis(option = "plasma", name = "") + 
+  labs(x = "Temperature [F]", y = "Season")
+
+library(tidyverse)
+chic %>% 
+   filter(season %in% c("Summer", "Winter")) %>% ## only plot extreme season using dplyr
+   ggplot(aes(y = year)) +
+   geom_density_ridges(aes(x = temp, fill = paste(year, season)), alpha = 0.7,
+                       rel_min_height = 0.01, color = "white", from = -5, to = 95) +
+   scale_fill_cyclical(breaks = c("1997 Summer", "1997 Winter"),
+                       labels = c(`1997 Summer` = "Summer", 
+                                  `1997 Winter` = "Winter"),
+                       values = c("tomato", "dodgerblue"),
+                       name = "Season", guide = "legend") +
+   theme_ridges() + 
+   labs(x = "Temperature [F]", y = "Year")
+
+ggplot(chic, aes(x = temp, y = year, height = ..density.., fill = year)) + 
+  geom_density_ridges(stat = "binline", bins = 25, scale = 0.9, 
+                      draw_baseline = F, show.legend = F) + 
+  labs(x = "Temperature [F]", y = "Season")
 
 #### Working with Ribbons ####
 ggplot(chic, aes(date, o3run)) +

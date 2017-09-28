@@ -1,5 +1,5 @@
 ---
-title: "ggplot2 Tutorial"
+title: "ggplot2 Overview"
 author:
   - name: Cedric Scherer (scherer@izw-berlin.de)
     affiliation: Leibniz Institute for Zoo and Wildlife Research (IZW) Berlin
@@ -23,9 +23,9 @@ output:
 link-citations: yes
 ---
 
-```{r set options, echo = F, cache = F}
+```{r set options, include = F, cache = F}
 options(width = 700)
-knitr::opts_chunk$set(cache = F, out.width = "100%")
+knitr::opts_chunk$set(cache = F, warning = F, message = F, out.width = "100%")
 docache <- F  ## set FALSE to re-run GAM smoothings
 ```
 
@@ -42,7 +42,7 @@ Major changes were made:
 * to modify data import and setup to RDS,
 * to have an executable R script for exercises and workshops,
 * to include additional tipps on e.g:
-    + other plot types (e.g. contour plot, rug representation),
+    + other plot types (e.g. contour plot, rug representation, joyplot),
     + how and why to use the `Viridis` color palettes,
     + creating minimal plots using the Tufte plotting style,
     + how to adjust the plots title, subtitle and caption,
@@ -66,12 +66,13 @@ Major changes were made:
     + `ggrepel`
     + `reshape2`
     + `akima`
+    + `ggridges`
     + `shiny`
 
 
 # Load `ggplot2`
 
-```{r library, message = F, warning = F, cache = F}
+```{r library, cache = F}
 library(ggplot2)
 ```
 
@@ -156,7 +157,7 @@ g + theme(axis.ticks.y = element_blank(), axis.text.y = element_blank())
 ## Limit Axis Range
 Sometimes you want to zoom into your data. You can do this without subsettting your data:
 
-```{r limit axis, warning = F}
+```{r limit axis}
 g + ylim(c(0, 50))
 ```
 
@@ -166,14 +167,15 @@ Alternatively you can use `g + scale_x_continuous(limits = c(0, 50))` or `g + co
 
 Related to that, you can force R to plot the graph starting at the origin:
 
-```{r origin, warning = F, message = F}
+```{r origin}
 library(tidyverse)
-chic_red <- filter(chic, temp > 25, o3 > 20)
-
-ggplot(chic_red, aes(temp, o3)) + 
-  geom_point() + 
-  labs(x = expression(paste("Temperature higher than 25 ", degree ~ F, "")), y = "Ozone higher than 20 ppb") +
-  expand_limits(x = 0, y = 0)
+chic %>% 
+  filter(temp > 25, o3 > 20) %>% 
+  ggplot(aes(temp, o3)) + 
+    geom_point() + 
+    labs(x = expression(paste("Temperature higher than 25 ", degree ~ F, "")), 
+         y = "Ozone higher than 20 ppb") +
+    expand_limits(x = 0, y = 0)
 ```
 
 Using `coord_cartesian(xlim = c(0, max(chic_red$temp)), ylim = c(0, max(chic_red$o3)))` will lead to the same result.
@@ -182,10 +184,10 @@ Using `coord_cartesian(xlim = c(0, max(chic_red$temp)), ylim = c(0, max(chic_red
 
 For demonstrating purposes, let's plot Temperature against Temperature with some random noise:
 
-```{r equal axes, warning = F}
+```{r equal axes}
 ggplot(chic, aes(temp, temp + rnorm(nrow(chic), sd = 20))) +
    geom_point() +
-   labs(x = "Temperature") +
+   labs(x = "Temperature [F]") +
    xlim(c(0, 150)) + ylim(c(0, 150)) +
    coord_equal()
 ```
@@ -197,7 +199,7 @@ Sometimes it is handy to alter your labels a little, perhaps adding units or per
 ```{r alter labs}
 ggplot(chic, aes(date, temp)) +
    geom_point(color = "firebrick") +
-   labs(x = "Year", y = "Temperature") +
+   labs(x = "Year", y = "Temperature [F]") +
    scale_y_continuous(label = function(x) {return(paste(x, "Degrees Fahrenheit"))})  
 ```
 
@@ -240,7 +242,7 @@ Note that you can also use different fonts. To use fonts which are installed on 
 
 After we loaded the package, you need to import and load the fonts ofinstalled on your device:
 
-```{r extrafont package, warning = F, message = F, cache = F}
+```{r extrafont package, cache = F}
 library(extrafont)
 font_import()
 loadfonts(device = "win")
@@ -271,7 +273,7 @@ We will color code the plot based on season. You can see that by default the leg
 ```{r plot seasons}
 (g <- ggplot(chic, aes(date, temp, color = factor(season))) +
          geom_point() +
-         labs(x = "Year", y = "Temperature"))
+         labs(x = "Year", y = "Temperature [F]"))
 ```
 
 ## Turn Off the Legend
@@ -293,7 +295,7 @@ We can archieve this by changing the levels of **season**:
 chic$season <- factor(chic$season, levels = c("Spring", "Summer", "Autumn", "Winter"))
 (g <- ggplot(chic, aes(date, temp, color = factor(season))) +
         geom_point() +
-        labs(x = "Year", y = "Temperature"))
+        labs(x = "Year", y = "Temperature [F]"))
 ```
 
 ## Turn Off Legend Titles
@@ -409,7 +411,7 @@ There are ways to change the entire look of your plot with one function (see bel
 ```{r panel color}
 (g <- ggplot(chic, aes(date, temp)) +
          geom_point(color = "firebrick") +
-         labs(x = "Year", y = "Temperature") +
+         labs(x = "Year", y = "Temperature [F]") +
          theme(panel.background = element_rect(fill = "white")))
 ```
 
@@ -457,7 +459,7 @@ The `ggplot2` package has two nice functions for creating multi-panel plots. The
 ```{r wrap plots 1 row}
 g <- ggplot(chic, aes(date, temp)) +
        geom_point(color = "chartreuse4") +
-       labs(x = "Year", y = "Temperature")
+       labs(x = "Year", y = "Temperature [F]")
 g + facet_wrap(~year, nrow = 1)
 ```
 
@@ -482,7 +484,7 @@ Note that both, x and y axes differ in their range!
 ```{r grid plots}
 ggplot(chic, aes(date, temp)) +
    geom_point(color = "orangered") +
-   labs(x = "Year", y = "Temperature") +
+   labs(x = "Year", y = "Temperature [F]") +
    facet_grid(year~season)
 ```
 
@@ -491,9 +493,9 @@ To change from row to column arrangement you can change `facet_grid(year~season)
 ## Put Two (Different) Plots Side by Side 
 Doing this is not nearly as straightforward as traditional (base) graphics. Here are two approaches:
 
-```{r plots combined 1, warning = F, cache = F}
+```{r plots combined 1, cache = F}
 p1 <- ggplot(chic, aes(date, temp, color = factor(season))) + 
-         geom_point() + labs(x = "Year", y = "Temperature") + guides(colour = F) 
+         geom_point() + labs(x = "Year", y = "Temperature [F]") + guides(colour = F) 
 p2 <- ggplot(chic, aes(x = date, y = o3)) + 
          geom_line(color = "grey") + geom_point(color = "red") + 
          labs(x = "Year", y = "Ozone")
@@ -506,9 +508,9 @@ print(p2, vp = viewport(layout.pos.row = 1, layout.pos.col = 2))
 
 Alternatively, this way might be a little bit easier (but now including legends --- but that's independent from the method):
 
-```{r plots combined 2, warning = F, message = F, cache = F}
+```{r plots combined 2, cache = F}
 p1 <- ggplot(chic, aes(date, temp, color = factor(season))) + 
-         geom_point() + labs(x = "Year", y = "Temperature") + 
+         geom_point() + labs(x = "Year", y = "Temperature [F]") + 
          theme(legend.title = element_blank())
 p2 <- ggplot(chic, aes(x = date, y = o3)) + 
          geom_line(aes(color = "line")) + geom_point(aes(color = "points")) + 
@@ -532,14 +534,14 @@ In order to use color with your data, most importantly you need to know if you a
 ```{r scale_color_manual}
 (g <- ggplot(chic, aes(date, temp, color = factor(season))) +
       geom_point() + 
-      labs(x = "Year", y = "Temperature") +
+      labs(x = "Year", y = "Temperature [F]") +
       theme(legend.title = element_blank()) +
       scale_color_manual(values = c("dodgerblue4", "darkolivegreen4", "darkorchid3", "goldenrod1")))
 ```
 
 ## Categorical Variables: Use Built-In Palettes
 
-```{r scale_color_brewer, message = F}
+```{r scale_color_brewer}
 g + scale_color_brewer(palette = "Set1")
 ```
 
@@ -547,7 +549,7 @@ You can ignore the message in the console, replacing the existing scale is what 
 
 ## Categorical Variables: Use [Tableau colors](http://www.tableau.com/de-de/about/blog/2016/7/colors-upgrade-tableau-10-56782) based on `ggthemes`
 
-```{r scale_color_tableau, warning = F, message = F, cache = F}
+```{r scale_color_tableau, cache = F}
 library(ggthemes)
 
 g + scale_color_tableau()
@@ -562,7 +564,7 @@ Here is the default `ggplot2` continuous color scheme (sequential color scheme):
 ```{r sequential colors}
 (g <- ggplot(chic, aes(date, temp, color = o3)) + 
          geom_point() + 
-         labs(x = "Year", y = "Temperature") +
+         labs(x = "Year", y = "Temperature [F]") +
          scale_color_continuous("Ozone:"))
 ```
 
@@ -577,13 +579,13 @@ ggplot(chic, aes(date, temp, color = o3)) +
 
 ## Continuous Variables: Manually Set a Sequential Color Scheme
 
-```{r scale_color_gradient, message = F}
+```{r scale_color_gradient}
 g + scale_color_gradient(low = "darkkhaki", high = "darkgreen", "Ozone:")
 ```
 
 Temperature data is normally distributed so how about a diverging color scheme (rather than sequential). For diverging color you can use the `scale_color_gradient2` function:
 
-```{r scale_color_gradient2, message = F, warning = F}
+```{r scale_color_gradient2}
 mid <- max(chic$o3) / 2  ## or mid <- mean(chic$o3)
 
 g + theme(panel.background = element_rect(fill = "grey60")) + 
@@ -605,7 +607,7 @@ You can test how your plots might appear under various form of colorblindness us
 
 The following multi-panel plot illustrates two out of the four viridis palettes:
 
-```{r viridis continuous, message = F, warning = F, cache = F}
+```{r viridis continuous, cache = F}
 library(viridis)
 p1 <- g + scale_color_viridis("Ozone:") + ggtitle("Viridis 'default'")
 p2 <- g + scale_color_viridis(option = "inferno", "Ozone:") + ggtitle("Viridis 'inferno'")
@@ -618,7 +620,7 @@ It is also possible to use the viridis color palettes for discrete variables:
 ```{r viridis discrete}
 ggplot(chic, aes(date, temp, color = factor(season))) +
    geom_point() + 
-   labs(x = "Year", y = "Temperature") +
+   labs(x = "Year", y = "Temperature [F]") +
    theme(legend.title = element_blank(), 
          panel.background = element_rect(fill = "grey50"), 
          legend.key = element_rect(fill = "grey50")) +
@@ -639,7 +641,7 @@ g + geom_hline(yintercept = c(20, 73))
 ```{r vline}
 ggplot(chic, aes(temp, o3)) +
    geom_point() +
-   labs(x = "Temperature", y = "Ozone") + 
+   labs(x = "Temperature [F]", y = "Ozone") + 
    geom_vline(xintercept = quantile(chic$temp)[4], linetype = 2, color = "firebrick", size = 2) +
    geom_hline(yintercept = quantile(chic$o3)[4], linetype = 2, color = "firebrick", size = 2)
 ```
@@ -651,7 +653,7 @@ reg <- lm(o3 ~ temp, data = chic)
 ggplot(chic, aes(temp, o3)) +
    geom_point() +
    labs(caption = paste0("y = ", round(coefficients(reg)[2], 2), " * x + ", round(coefficients(reg)[1], 2)), 
-        x = "Temperature", y = "Ozone") + 
+        x = "Temperature [F]", y = "Ozone") + 
    geom_abline(intercept = coefficients(reg)[1], slope = coefficients(reg)[2], color = "darkorange1", size = 1.5)
 ```
 
@@ -664,18 +666,21 @@ Later, we will learn how to add a linear fit with one command using `stat_smooth
 
 Sometimes, we want to label our data points. To avoid overlaying and -crowding by text labels, we use a 1% sample of the original data, equally representing the four seasons.  
 
-```{r data text, warning = F, message = F, cache = F}
+```{r data text, cache = F}
 set.seed(2017)
 library(tidyverse)
 sample <- chic %>% group_by(season) %>% sample_frac(0.01)
 # base R code: sample <- sample_frac(group_by(chic, season), 0.01)
 
-ggplot(sample, aes(date, temp, label = season)) +
-   geom_point() + 
-   geom_text(aes(colour = factor(temp)), hjust = 0.5, vjust = -0.5) +
-   labs(x = "Year", y = "Temperature") +
-   xlim(as.Date(c('1997-01-01', '2000-12-31'))) + ylim(c(0, 90)) +
-   theme(legend.position = "none")
+chic %>% 
+  group_by(season) %>% 
+  sample_frac(0.01) %>% 
+  ggplot(aes(date, temp, label = season)) +
+    geom_point() + 
+  geom_text(aes(colour = factor(temp)), hjust = 0.5, vjust = -0.5) +
+  labs(x = "Year", y = "Temperature [F]") +
+  xlim(as.Date(c('1997-01-01', '2000-12-31'))) + ylim(c(0, 90)) +
+  theme(legend.position = "none")
 ```
 
 Okay, avoiding overlays of labels did not work out. But don't worry, we are going to fix it in a minute!
@@ -686,20 +691,20 @@ You can also use `geom_label` for boxes:
 ggplot(sample, aes(date, temp, label = season)) +
    geom_point() + 
    geom_label(aes(fill = factor(temp)), colour = "white", fontface = "bold", hjust = 0.5, vjust = -0.25) +
-   labs(x = "Year", y = "Temperature") +
+   labs(x = "Year", y = "Temperature [F]") +
    xlim(as.Date(c('1997-01-01', '2000-12-31'))) + ylim(c(0, 90)) +
    theme(legend.position = "none")
 ```
 
 A cool thing is the `ggrepel` package which provides geoms for `ggplot2` to repel overlapping text as in our examples above. Here, we also show both, the original data and our sample data which gets labeled:
 
-```{r ggrepel, warning = F, cache = F}
+```{r ggrepel, cache = F}
 library(ggrepel)
 ggplot(chic, aes(date, temp, label = season)) +
    geom_point() +
    geom_point(data = sample, aes(color = factor(temp)), size = 2.5) +
    geom_label_repel(data = sample, aes(fill = factor(temp)), colour = "white", fontface = "bold") +
-   labs(x = "Year", y = "Temperature") +
+   labs(x = "Year", y = "Temperature [F]") +
    theme(legend.position = "none")
 ```
 
@@ -711,22 +716,22 @@ With `ggplot2` you can set annotation coordinates to `Inf` but this is only mode
 
 The `grobTree` function from the `grid` package creates a grid graphical object and textGrob creates the text graphical object. The `annotation_custom()` function comes from `ggplot2` and is designed to use a grob as input.
 
-```{r grobTree, warning = F, cache = F}
+```{r grobTree, cache = F}
 library(grid)
 my_grob = grobTree(textGrob("This text stays in place!", x = 0.1, y = 0.95, hjust = 0, gp = gpar(col = "blue", fontsize = 15, fontface = "italic")))
 
 ggplot(chic, aes(temp, o3)) +
    geom_point(color = "firebrick") + 
-   labs(x = "Temperature", y ="Ozone") +
+   labs(x = "Temperature [F]", y ="Ozone") +
    annotation_custom(my_grob)
 ```
 
 The value of this is particularly evident when you have multiple plots with **different scales**. In the plot below you see that the axis scales vary yet the same code as above can be used to put the annotation is the same place on each facet.
 
-```{r grobTree scales free, warning = F}
+```{r grobTree scales free}
 ggplot(chic, aes(temp, o3)) +
    geom_point(color = "firebrick") + 
-   labs(x = "Temperature", y ="Ozone") +
+   labs(x = "Temperature [F]", y ="Ozone") +
    facet_wrap(~season, scales = "free") +
    annotation_custom(my_grob)
 ```
@@ -745,8 +750,28 @@ ggplot(chic, aes(x = season, y = o3)) +
    coord_flip()
 ```
 
+## Reverse an Axis
+
+You can also easily reverse an axis using `scale_x_reverse()` or `scale_y_reverse()`, respectively:
+
+```{r reversed-axis}
+g + scale_y_reverse()
+```
+
+## Transform an Axis
+
+... or transform the default linear mapping by using `scale_y_log10()` or `scale_y_sqrt()`. As an example, here is a log<sub>10</sub>-transformed axis (which introduces NA's in this case so be careful):
+
+```{r log-axis, warning=F}
+g + scale_y_log10(lim = c(0.1, 100)) +
+   labs(x = "Year", y = "log(Temperature)")
+```
+
+
 # Working with Plot Types
+
 ## Alternatives to The Box Plot 
+
 Box plots are great, but they can be so incredibly boring. There are alternatives, but first we are plotting a common box plot:
 
 ```{r geom_boxplot}
@@ -799,7 +824,7 @@ g + geom_violin(color = "gray", alpha = 0.5) +
 ggplot(chic, aes(date, temp, color = factor(season))) +
    geom_point() +
    geom_rug() +
-   labs(x = "Year", y = "Temperature") +
+   labs(x = "Year", y = "Temperature [F]") +
    theme(legend.position = "none")
 ```
 
@@ -815,7 +840,7 @@ corm
 
 Now we put the resulting matrix in **long** format using the melt function from the `reshape2` package and drop the records with `NA` values:
 
-```{r melt correlation matrix, warning = F, message = F, cache = F}
+```{r melt correlation matrix, cache = F}
 library(reshape2)
 corm <- melt(corm)
 corm$Var1 <- as.character(corm$Var1)
@@ -839,7 +864,7 @@ ggplot(corm, aes(Var2, Var1)) +
 ## Create a Contour Plot
 Contour plots are s nice way to display three-dimensional data by indicating die thresholds of values. Here, we are going to plot the dew point (i.e. [the temperature at which airborne water vapor will condense to form liquid dew](https://en.wikipedia.org/wiki/Dew_point)) related to temperature and ozone levels:
 
-```{r contour, warning = F, cache = F}
+```{r contour, cache = F}
 ## interpolate data
 library(akima)
 fld <- with(chic, interp(x = temp, y = o3, z = dewpoint))
@@ -880,37 +905,99 @@ g + geom_tile(aes(fill = Dewpoint)) +
     scale_fill_viridis()
 ```
 
+## Create a Joyplot aka Ridgeline Plot
+Joyplots (also called *ridgleline plots*) are a new type of plots which is very popular at the moment. (Fun fact: The name refers to the [cover of Joy Division's "Unknown Pleasures" LP](https://en.wikipedia.org/wiki/File:Unknown_Pleasures_Joy_Division_LP_sleeve.jpg).)
+
+While you can create those plots with [basic `ggplot` commands](https://github.com/halhen/viz-pub/blob/master/sports-time-of-day/2_gen_chart.R) the popularity lead to a package that make it easier create those plots: [`ggridges`](https://cran.r-project.org/web/packages/ggridges/index.html). We are going to use this package here.
+
+```{r ridges}
+library(ggridges)
+ggplot(chic, aes(temp, year)) + 
+   geom_density_ridges(fill = "grey90") +
+   labs(x = "Temperature [F]", y = "Year")
+```
+
+You can easily specify the overlap and the trailing tails by using the arguments `rel_min_height` and `scale`, respectively. The package also comes with  it's own theme (but I would prefer to build my own, see chapter "Create and Use Your Custom Theme"). Additionally, we change the colors based on year to make it more appealing.
+
+```{r ridges specified}
+ggplot(chic, aes(temp, year, fill = year)) + 
+  geom_density_ridges(alpha = 0.8, color = "white", scale = 2.5, rel_min_height = 0.01) + 
+  labs(x = "Temperature [F]", y = "Year") + 
+  guides(fill = F) + 
+  theme_ridges()
+```
+
+You can also get rid of the overlap using values below 1 for the scaling argument (but this somehow contradicts the idea of joyplots...). Here is an example additionally using the `viridis` color gradient:
+
+```{r ridges viridis}
+ggplot(chic, aes(x = temp, y = season, fill = ..x..)) + 
+  geom_density_ridges_gradient(scale = 0.9, gradient_lwd = 0.5, color = "black") + 
+  scale_fill_viridis(option = "plasma", name = "") + 
+  labs(x = "Temperature [F]", y = "Season") +
+  theme_ridges(grid = F)
+```
+
+We can also compare several groups per ridgeline and coloring them according to their group. This follows the idea of [Marc Belzunces](https://twitter.com/marcbeldata/status/888697140268204032).
+
+```{r ridges compare groups}
+library(tidyverse)
+chic %>% 
+  ## only plot extreme season using dplyr from the tidyverse
+  filter(season %in% c("Summer", "Winter")) %>% 
+  ggplot(aes(y = year)) +
+  geom_density_ridges(aes(x = temp, fill = paste(year, season)), alpha = 0.7, 
+                      rel_min_height = 0.01, color = "white", from = -5, to = 95) +
+  scale_fill_cyclical(breaks = c("1997 Summer", "1997 Winter"),
+                      labels = c(`1997 Summer` = "Summer", 
+                                 `1997 Winter` = "Winter"),
+                      values = c("tomato", "dodgerblue"),
+                      name = "Season", guide = "legend") +
+  theme_ridges() + 
+   labs(x = "Temperature [F]", y = "Year")
+```
+
+
+The `ggridges` packages is also helpful to create histograms for different groups using `stat = "binline"` in the `geom_density_ridges` command:
+
+```{r ridges as histograms}
+ggplot(chic, aes(x = temp, y = year, height = ..density.., fill = year)) + 
+  geom_density_ridges(stat = "binline", bins = 25, scale = 0.9, 
+                      draw_baseline = F, show.legend = F) + 
+  labs(x = "Temperature [F]", y = "Season")
+```
+
 
 # Working with Ribbons (AUC, CI, etc.)
-This is not the perfect dataset for this, but using ribbon can be useful. In this example we will create a 30-day running average using the filter() function so that our ribbon is not too noisy.
 
-```{r default for ribbon, warning = F}
+This is not a perfect dataset for demonstrating this, but using ribbon can be useful. In this example we will create a 30-day running average using the filter() function so that our ribbon is not too noisy.
+
+```{r default for ribbon}
 chic$o3run <- as.numeric(stats::filter(chic$o3, rep(1/30, 30), sides = 2))
 
 ggplot(chic, aes(date, o3run)) +
    geom_line(color = "chocolate", lwd = 1) +
-   labs(x = "Year", y = "Temperature")
+   labs(x = "Year", y = "Temperature [F]")
 ```
 
 How does it look if we fill in the area below the curve using the `geom_ribbon()` function?
 
-```{r geom_ribbon AUC, warning = F}
+```{r geom_ribbon AUC}
 ggplot(chic, aes(date, o3run)) +
    geom_ribbon(aes(ymin = 0, ymax = o3run), fill = "orange", color = "orange", alpha = 0.4) +
    geom_line(color = "chocolate", lwd = 1) +
-   labs(x = "Year", y = "Temperature")
+   labs(x = "Year", y = "Temperature [F]")
 ```
 
 Nice to indicate the [area under the curve (AUC)](https://en.wikipedia.org/wiki/Area_under_the_curve_(pharmacokinetics)) but this is not the conventional way to use `geom_ribbon()`. Instead, we draw a ribbon that gives us one standard deviation above and below our data:
 
-```{r geom_ribbon range, warning = F}
+```{r geom_ribbon range}
 chic$mino3 <- chic$o3run - sd(chic$o3run, na.rm = T)
 chic$maxo3 <- chic$o3run + sd(chic$o3run, na.rm = T)
 
 ggplot(chic, aes(date, o3run)) +
    geom_ribbon(aes(ymin = mino3, ymax = maxo3), fill = "lightskyblue", color = "lightskyblue") +
    geom_line(color = "royalblue4", lwd = 0.7) +
-   labs(x = "Year", y = "Temperature")
+   labs(x = "Year", y = "Temperature [F]")
 ```
 
 # Working with Smoothings
@@ -922,7 +1009,7 @@ Here it is at its simplest -- not even a formula required. For datasets with n <
 ```{r stat_smooth}
 ggplot(chic, aes(date, temp)) + 
    geom_point(color="firebrick")+
-   labs(x = "Year", y = "Temperature") +
+   labs(x = "Year", y = "Temperature [F]") +
    stat_smooth()
 ```
 
@@ -932,7 +1019,7 @@ ggplot(chic, aes(date, temp)) +
 ```{r GAM spec, cache = F}
 ggplot(chic, aes(date, temp)) + 
    geom_point(color="grey60")+
-   labs(x = "Year", y = "Temperature") +
+   labs(x = "Year", y = "Temperature [F]") +
    stat_smooth(method = "gam", formula = y~s(x, k = 1000), 
                se = F, size = 1.3, aes(col = "1000")) +
    stat_smooth(method = "gam", formula = y~s(x, k = 100), 
@@ -948,7 +1035,7 @@ Though the default is a smooth, it is also easy to add a standard linear fit:
 ```{r GLM}
 ggplot(chic, aes(temp, death)) +
    geom_point(color = "firebrick") +
-   labs(x = "Temperature", y = "Deaths") +
+   labs(x = "Temperature [F]", y = "Deaths") +
    stat_smooth(method = "lm", col = "darkorange1", se = F, size = 1.3)
 ```
 
@@ -961,12 +1048,12 @@ You can change the entire look of the plots by using themes. As an example, Jeff
 
 Here is an example copying the [plotting style](https://www.google.de/search?q=economist+graphic&tbm=isch) in the [The Economist](http://www.economist.com/) magazine:
 
-```{r Economist, warning = F, cache = F}
+```{r Economist, cache = F}
 library(ggthemes)
 
 ggplot(chic, aes(date, temp, color = factor(season))) +
    geom_point() +
-   labs(x = "Year", y = "Temperature") + 
+   labs(x = "Year", y = "Temperature [F]") + 
    ggtitle("Ups and Downs of Chicagos Daily Temperatures") +
    theme_economist() + 
    scale_colour_economist(name = "Seasons:") +
@@ -981,7 +1068,7 @@ chic.red <- chic[sample(nrow(chic), 50), ]
 
 (t <- ggplot(chic.red, aes(temp, o3)) +
    geom_point() +
-   labs(x = "Temperature", y = "Ozone") + 
+   labs(x = "Temperature [F]", y = "Ozone") + 
    ggtitle("Temperature and Ozone Levels in Chicago") +
    theme_tufte() +
    stat_smooth(method = "lm", col = "black", size = 0.7, fill = "gray60", alpha = 0.2))
@@ -1004,7 +1091,7 @@ theme_set(theme_gray(base_size = 30))
 
 ggplot(chic, aes(date, temp, color = factor(season))) + 
    geom_point() + 
-   labs(x = "Year", y = "Temperature") + 
+   labs(x = "Year", y = "Temperature [F]") + 
    guides(colour = F) 
 ```
 
@@ -1012,13 +1099,13 @@ ggplot(chic, aes(date, temp, color = factor(season))) +
 
 If you want to change the theme for an entire session you can use `theme_set` as in `theme_set(theme_bw())`. The default is called `theme_gray`. If you wanted to create your own custom theme, you could extract the code directly from the gray theme and modify. Note that the `rel()` function change the sizes relative to the `base_size`.
 
-```{r default theme, warning = F}
+```{r default theme}
 theme_gray
 ```
 
 Now, let us modify the default theme function and have a look at the result:
 
-```{r modify theme, warning = F, results = "hide"}
+```{r modify theme, results = "hide"}
 theme_gray.mod <- function (base_size = 12, base_family = "") {
   half_line <- base_size/2
   theme(line = element_line(colour = "black", size = 0.5, linetype = 1, lineend = "butt"), 
@@ -1096,7 +1183,7 @@ Have a look on the modified aesthetics with its new look of panel and gridlines 
 theme_set(theme_gray.mod())
 
 ggplot(chic, aes(date, temp, color = factor(season))) + 
-   geom_point() + labs(x = "Year", y = "Temperature") + guides(colour = F)
+   geom_point() + labs(x = "Year", y = "Temperature [F]") + guides(colour = F)
 ```
 
 **This way of changing the plot design is highly recommended!** It allows you to quickly change any element of your plots by changing it once. You can within a few seconds plot all your results in a congruent style and adapt it to other needs (e.g. a presentation with bigger font size or journall requirements)
@@ -1107,7 +1194,7 @@ You can also set quick changes using `theme_update`:
 theme_gray.mod <- theme_update(panel.background = element_rect(fill = "gray50"))
 
 ggplot(chic, aes(date, temp, color = factor(season))) + 
-   geom_point() + labs(x = "Year", y = "Temperature") + guides(colour = F)
+   geom_point() + labs(x = "Year", y = "Temperature [F]") + guides(colour = F)
 ```
 
 For further exercises, we are going to reset the theme to its default:
