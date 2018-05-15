@@ -6,8 +6,6 @@ author:
 date: "`r Sys.Date()`"
 output:
   tint::tintHtml:
-  #prettydoc::html_pretty:
-     #theme: leonids #tactile #cayman, leonids, tactile, architect, hpstr
   #html_document:
      toc: true
      toc_depth: 1
@@ -23,7 +21,6 @@ link-citations: yes
 ```{r set options, include = F, cache = F}
 options(width = 700)
 knitr::opts_chunk$set(cache = F, warning = F, message = F, out.width = "100%")
-docache <- F  ## set FALSE to re-run GAM smoothings
 ```
 
 
@@ -74,13 +71,6 @@ install.packages(c("ggplot2", "ggthemes", "tidyverse", "extrafont", "grid",
 (For teaching reasons and if people jump to any plot, I load the package needed beside ggplot2 in the respective chunk.)
 
 
-# Load `ggplot2`
-
-```{r library, cache = F}
-library(ggplot2)
-```
-
-
 # The Dataset
 
 We are using data from the **National Morbidity and Mortality Air Pollution Study** (NMMAPS). To make the plots manageable we are limiting the data to Chicago and 1997-2000. For more detail on this dataset, consult Roger Peng's book [Statistical Methods in Environmental Epidemiology with R](http://www.springer.com/de/book/9780387781662). 
@@ -118,7 +108,14 @@ The overall visual defaults of a plot, such as background, grids, axe, default t
 
 # A Default ggplot
 
-`ggplot2` syntax is different from base R. We always start to define a plotting element by calling `ggplot(data, aes(variable1, variable2))` which just tells `ggplot2` that we are going to work with that data. Thus, only a panel is created when running this because `ggplot2` does not know **how** we want to plot that data.
+First, we are going to load the `ggplot2 `package (which we can also load via the [tidyverse package collection](https://www.tidyverse.org/)):
+
+```{r library, cache = F}
+library(ggplot2)
+#library(tidyverse)
+```
+
+`ggplot2` syntax is different from base R. As shown before, we always start to define a plotting element by calling `ggplot(data, aes(variable1, variable2))` which just tells `ggplot2` that we are going to work with that data. Thus, only a panel is created when running this because `ggplot2` does not know **how** we want to plot that data.
 
 ```{r ggplot}
 (g <- ggplot(chic, aes(date, temp)))
@@ -1084,7 +1081,7 @@ ggplot(chic, aes(date, temp)) +
 
 `ggplot2` allows you to specify the model you want it to use. Lets say you want to increase the GAM dimension (add some additional wiggles to the smooth):
 
-```{r GAM spec, cache = F}
+```{r GAM spec, cache = T}
 ggplot(chic, aes(date, temp)) + 
    geom_point(color="grey60")+
    labs(x = "Year", y = "Temperature [F]") +
