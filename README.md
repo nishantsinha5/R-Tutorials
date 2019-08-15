@@ -8,6 +8,8 @@ Authors:
 
 ## ggplot2 Tutorial:
 
+**The version hosted here is outdated. You can find the latest version [here](https://cedricscherer.netlify.com/2019/08/05/a-ggplot2-tutorial-for-beautiful-plotting-in-r/).**
+
 [html version](https://rawgit.com/Z3tt/R-Tutorials/master/ggplot2/ggplot2-tutorial.html)
 
 The initial version of this tutorial follows a blog entry called [**Beautiful plotting in R: A ggplot2 cheatsheet**](http://zevross.com/blog/2014/08/04/beautiful-plotting-in-r-a-ggplot2-cheatsheet-3/) by zev@zevross.com, posted on 4. August 2014, updated last in January 2016.
