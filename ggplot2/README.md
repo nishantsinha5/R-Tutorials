@@ -29,3 +29,7 @@ Some major changes I’ve made:
     + how to add labels to your data (and how to do it in a beautiful way)
 
 Since the blog entry by Zev Ross was not updated for some years, I hosted the updated version (last update Jan 2017) on my GitHub. Now it finds its proper place on this homepage! (Plus I added some updates, for example the fantastic patchwork package. And pie charts because everyone looooves pie charts!)
+
+### Sneak Peak
+
+![./img/overview.png](https://github.com/Z3tt/R-Tutorials/blob/master/ggplot2/img/overview.png)
