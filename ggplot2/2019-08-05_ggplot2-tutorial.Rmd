@@ -16,7 +16,7 @@ options(width = 700)
 knitr::opts_chunk$set(warning = F, message = F, out.width = "100%")
 ```
   
-*Last updated: 2019-08-05*
+*Last update: 2019-08-16*
 
 
 ## Introductory Words
@@ -177,7 +177,7 @@ Let's add some well-written labels to the axes:
 ```{r axis-labs}
 ggplot(chic, aes(x = date, y = temp)) +
   geom_point(color = "firebrick") + 
-  labs(x = "Date", y = expression(paste("Temperature (", degree ~ F, ")")))
+  labs(x = "Year", y = expression(paste("Temperature (", degree ~ F, ")")))
 ```
 
 ### Move Labels Away from the Plot & Change Color
@@ -187,7 +187,7 @@ ggplot(chic, aes(x = date, y = temp)) +
 ```{r labs-color}
 ggplot(chic, aes(x = date, y = temp)) +
   geom_point(color = "firebrick") + 
-  labs(x = "Date", y = "Temperature (°F)") + 
+  labs(x = "Year", y = "Temperature (°F)") + 
   theme(axis.title.x = element_text(color = "sienna", 
                                     size = 15, vjust = -0.35),
         axis.title.y = element_text(color = "orangered", 
@@ -201,7 +201,7 @@ Using `angle` and `vjust` you can adjust the position of the text (0 = left-alli
 ```{r axis-text}
 ggplot(chic, aes(x = date, y = temp)) +
   geom_point(color = "firebrick") + 
-  labs(x = "Date", y = "Temperature (°F)") +
+  labs(x = "Year", y = "Temperature (°F)") +
   theme(axis.text.x = element_text(angle = 50, size = 16, 
                                    vjust = 0.5))
 ```
@@ -213,7 +213,7 @@ There may be rarely a reason to do so - but this is how it works:
 ```{r axis-no-labs}
 ggplot(chic, aes(x = date, y = temp)) +
   geom_point(color = "firebrick") + 
-  labs(x = "Date", y = "Temperature (°F)") +
+  labs(x = "Year", y = "Temperature (°F)") +
   theme(axis.ticks.y = element_blank(), 
         axis.text.y = element_blank())
 ```
@@ -227,7 +227,7 @@ Sometimes you want to zoom into your data. You can do this without subsettting y
 ```{r axis-limit}
 ggplot(chic, aes(x = date, y = temp)) +
   geom_point(color = "firebrick") + 
-  labs(x = "Date", y = "Temperature (°F)") +
+  labs(x = "Year", y = "Temperature (°F)") +
   ylim(c(0, 50))
 ```
 
@@ -301,16 +301,16 @@ We can add a title via the `ggtitle()` function:
 ```{r title}
 ggplot(chic, aes(x = date, y = temp)) +
   geom_point(color = "firebrick") + 
-  labs(x = "Date", y = "Temperature (°F)") + 
+  labs(x = "Year", y = "Temperature (°F)") + 
   ggtitle("Temperatures in Chicago")
 ```
 
-Alternatively, you can use `g + labs("Temperatures in Chicago")`. Here you can add several arguments, e.g. additionally a `subtitle` and a `caption`:
+Alternatively, you can use `g + labs(tite = "Temperatures in Chicago")`. Here you can add several arguments, e.g. additionally a `subtitle` and a `caption`:
 
 ```{r title-labs}
 ggplot(chic, aes(x = date, y = temp)) +
   geom_point(color = "firebrick") + 
-  labs(x = "Date", y = "Temperature (°F)",
+  labs(x = "Year", y = "Temperature (°F)",
        title = "Temperatures in Chicago", 
        subtitle = "Seasonal pattern of daily temperatures from 1997 to 2001", 
        caption = "Data: NMMAPS")
@@ -323,8 +323,8 @@ The face argument can be used to make the font bold or italic. The margin argume
 ```{r title-bold}
 ggplot(chic, aes(x = date, y = temp)) +
   geom_point(color = "firebrick") + 
-  labs(x = "Date", y = "Temperature (°F)") + 
-  ggtitle("Temperatures in Chicago") +
+  labs(x = "Year", y = "Temperature (°F)", 
+       title = "Temperatures in Chicago") + 
   theme(plot.title = element_text(size = 15, face = "bold", 
                                   margin = margin(10, 0, 10, 0)))
 ```
@@ -338,8 +338,8 @@ Allignement is controlled by `hjust` (which stands for horizontal adjustment):
 ```{r title-adjust}
 ggplot(chic, aes(x = date, y = temp)) +
   geom_point(color = "firebrick") +  
-  ggtitle("Temperatures in Chicago") +
-  labs(x = "Date", y = "Temperature (°F)") + 
+  labs(x = "Year", y = "Temperature (°F)", 
+       title = "Temperatures in Chicago") + 
   theme(plot.title = element_text(size = 15, face = 4, hjust = 1))
 ```
 
@@ -362,7 +362,7 @@ Now, we can use one of those font families:
 ```{r title-style}
 ggplot(chic, aes(x = date, y = temp)) +
   geom_point(color = "firebrick") + 
-  labs(x = "Date", y = "Temperature (°F)") + 
+  labs(x = "Year", y = "Temperature (°F)", title = "Temperatures in Chicago") + 
   theme(plot.title = element_text(size = 18, family = "Merriweather"))
 ```
 
@@ -380,7 +380,7 @@ You can use the lineheight argument to change the spacing between lines. In this
 ```{r multiline-title}
 ggplot(chic, aes(x = date, y = temp)) +
   geom_point(color = "firebrick") + 
-  labs(x = "Date", y = "Temperature (°F)") + 
+  labs(x = "Year", y = "Temperature (°F)") + 
   ggtitle("Temperatures in Chicago\nfrom 1997 to 2001") + 
   theme(plot.title = element_text(size = 16, face = "bold", 
                                   vjust = 1, lineheight = 0.75))
@@ -565,7 +565,7 @@ Here is the default:
 ```{r legend-default}
 ggplot(chic, aes(x = date, y = o3)) +
   geom_line(color = "gray") +
-  geom_point(color = "darkorange1") +
+  geom_point(color = "darkorange2") +
   labs(x = "Year", y = "Ozone")
 ```
 
@@ -589,7 +589,7 @@ ggplot(chic, aes(x = date, y = o3)) +
   geom_point(aes(color = "points")) +
   labs(x = "Year", y = "Ozone") +
   scale_color_manual("", guide = "legend", 
-                     values = c("points" = "darkorange1", 
+                     values = c("points" = "darkorange2", 
                                 "line" = "gray")) +
   guides(color = guide_legend(override.aes = list(linetype = c(1, 0), 
                                                   shape = c(NA, 16))))
@@ -726,7 +726,7 @@ p1 <- ggplot(chic, aes(x = date, y = temp,
 
 p2 <- ggplot(chic, aes(x = date, y = o3)) + 
         geom_line(color = "gray") + 
-        geom_point(color = "darkorange1") + 
+        geom_point(color = "darkorange2") + 
         labs(x = "Year", y = "Ozone")
 
 library(patchwork)
@@ -1105,7 +1105,7 @@ ggplot(chic, aes(x = temp, y = o3)) +
                         " * x + ", round(coefficients(reg)[1], 2)), 
        x = "Temperature (°F)", y = "Ozone") + 
   geom_abline(intercept = coefficients(reg)[1], slope = coefficients(reg)[2], 
-              color = "darkorange1", size = 1.5)
+              color = "darkorange2", size = 1.5)
 ```
 
 Later, we will learn how to add a linear fit with one command using `stat_smooth(method = "lm")`. However, there might be other reasons to add a line with a given slope.
@@ -1587,7 +1587,7 @@ ggplot(chic, aes(x = date, y = temp)) +
                se = F, size = 1, aes(col = "100")) +
    stat_smooth(method = "gam", formula = y ~ s(x, k = 10), 
                se = F, size = 0.8, aes(col = "10")) +
-   scale_color_manual(name = "k", values = c("darkorange1", 
+   scale_color_manual(name = "k", values = c("darkorange2", 
                                              "firebrick", 
                                              "dodgerblue3"))
 ```
