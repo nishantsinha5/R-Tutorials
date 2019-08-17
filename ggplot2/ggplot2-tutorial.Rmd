@@ -2,13 +2,13 @@
 title: "A ggplot2 Tutorial for Beautiful Plotting in R"
 author: "Cédric"
 date: 2019-08-05
-image: img/banner/sun_RichardStrozynski.jpg
-layout: post
-showtoc: false
-description: "This is a rework of the blog entry called 'Beautiful plotting in R: A ggplot2 cheatsheet' by Zev Ross, posted in 2014 and updated last in 2016. Most changes were made to have an updated version, to follow code style guides, to change style and aesthetics of plots to be (more) beautiful and meaningful and to include additional tipps."
-tags: ["R", "ggplot2", "tidyverse", "DataViz", "tutorial"]
-editor_options:
-  chunk_output_type: console
+output:
+  tint::tintHtml: 
+     self_contained: TRUE
+     highlight: haddock
+     fig_caption: yes
+bibliography: references.bib
+link-citations: yes
 ---
 
 ```{r set options, include = F}
@@ -22,8 +22,11 @@ knitr::opts_chunk$set(warning = F, message = F, out.width = "100%")
 ## Introductory Words
 
 Begin of 2016, I had to prepare my PhD introductory talk and I started using `ggplot2` to visualize my data since I never liked the syntax and style of base plots in `R`. Because I was short on time, I plotted these figures by try'n'error and with the help of lots of googling. The resource I came always back to was a blog entry called [**Beautiful plotting in R: A ggplot2 cheatsheet**](http://zevross.com/blog/2014/08/04/beautiful-plotting-in-r-a-ggplot2-cheatsheet-3/) by [Zev Ross](https://twitter.com/zevross), posted on 4. August 2014, updated last in January 2016.
-
 After giving the talk which contained some quite beautiful plots thanks to the blog post, I decided to go through this tutorial step-by-step. I learned so much from it and directly started modifying the codes and over the time I added some additional code snippets, chart types and resources. 
+
+Since the blog entry by Zev Ross was not updated for some years, I hosted the updated version (last update Jan 2017) on my GitHub. Now it finds its proper place on this homepage! (Plus I added some updates, for example the fantastic `patchwork` and `ggforce` packages. And pie charts because everyone looooves pie charts!)
+
+<img src="/img/ggplot-tutorial/overview.png" style="height: 100%; width: 100%; object-fit: contain" onclick="window.open('https://cedricscherer.netlify.com/img/ggplot-tutorial/overview.png', 'blank');"/>
 
 Major changes I've made:
 
@@ -36,13 +39,11 @@ Major changes I've made:
     + other plot types (e.g. contour plot, rug representation, ridge plot)
     + how and why to use the viridis color palettes
     + creating minimal plots using the Tufte plotting style
-    + how to adjust the plots title, subtitle and caption
+    + how to adjust the plots title, subtitle and captionl
     + how to add different types of lines to a plot
     + how to change the order in a legend and legend key names
     + how to add labels to your data (and how to do it in a beautiful way)
-
-Since the blog entry by Zev Ross was not updated for some years, I hosted the updated version (last update Jan 2017) on my GitHub. Now it finds its proper place on this homepage! (Plus I added some updates, for example the fantastic `patchwork` package. And pie charts because everyone looooves pie charts!)
-
+  
 
 ## Table of Content {#toc}
 
@@ -82,12 +83,14 @@ Since the blog entry by Zev Ross was not updated for some years, I hosted the up
     + gridExtra
     + ggrepel
     + reshape2
+    + ggforce
     + ggridges
     + shiny
 
 ```{r install-packages, eval = F}
-install.packages(c("ggplot2", "ggthemes", "tidyverse", "extrafont", "cowplot", 
-                   "grid", "gridExtra", "ggrepel", "reshape2", "ggridges", "shiny"))
+install.packages(c("ggplot2", "ggthemes", "tidyverse", "extrafont", 
+                   "cowplot", "grid", "gridExtra", "ggrepel", 
+                   "reshape2", "ggforce", "ggridges", "shiny"))
 
 devtools::install_github("thomasp85/patchwork")
 ```
@@ -139,7 +142,7 @@ library(ggplot2)
 #library(tidyverse)
 ```
 
-`ggplot2` syntax is different from base R. As shown before, we always start to define a plotting element by calling `ggplot(data, aes(variable1, variable2))` which just tells `ggplot2` that we are going to work with that data. Thus, only a panel is created when running this because `ggplot2` does not know *how* we want to plot that data.
+`ggplot2` syntax is different from base R. As shown before, we always start to define a plotting element by calling `ggplot(data = df, aes(x = variable1, y = variable2))` which just tells `ggplot2` that we are going to work with that data. Thus, only a panel is created when running this because `ggplot2` does not know *how* we want to plot that data.
 
 ```{r ggplot}
 (g <- ggplot(chic, aes(x = date, y = temp)))
@@ -153,7 +156,7 @@ Let's tell `ggplot` which style we want to use:
 g + geom_point()
 ```
 
-(No worries, we are going to learn several plot types later.)
+No worries, we are going to learn several plot types at [a later point](#charts).
 
 ### Change Color of Points
 
@@ -168,7 +171,8 @@ By applying that to our plotting element, the following plots based on `g` are g
 And let's get rid of the greyish default ggplot look by setting a different built-in theme, e.g. `theme_bw`:
 
 ```{r remove-grey-background}
-theme_set(theme_bw)
+theme_set(theme_bw())
+
 g + geom_point(color = "firebrick")
 ```
 
