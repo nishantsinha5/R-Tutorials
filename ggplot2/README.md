@@ -6,6 +6,8 @@ Author: Cédric Scherer (cedricphilippscherer@gmail.com)
 
 The initial version of this tutorial follows a blog entry called [**Beautiful plotting in R: A ggplot2 cheatsheet**](http://zevross.com/blog/2014/08/04/beautiful-plotting-in-r-a-ggplot2-cheatsheet-3/) by zev@zevross.com, posted on 4. August 2014, updated last in January 2016.
 
+![./img/overview.png](https://github.com/Z3tt/R-Tutorials/blob/master/ggplot2/img/overview.png)
+
 ### Introductory Words
 
 Begin of 2016, I had to prepare my PhD introductory talk and I started using `ggplot2` to visualize my data since I never liked the syntax and style of base plots in R. Because I was short on time, I plotted these figures by try’n’error and with the help of lots of googling. The resource I came always back to was a blog entry called Beautiful plotting in R: A ggplot2 cheatsheet by Zev Ross..
@@ -29,7 +31,3 @@ Some major changes I’ve made:
     + how to add labels to your data (and how to do it in a beautiful way)
 
 Since the blog entry by Zev Ross was not updated for some years, I hosted the updated version (last update Jan 2017) on my GitHub. Now it finds its proper place on this homepage! (Plus I added some updates, for example the fantastic patchwork package. And pie charts because everyone looooves pie charts!)
-
-### Sneak Peak
-
-![./img/overview.png](https://github.com/Z3tt/R-Tutorials/blob/master/ggplot2/img/overview.png)
