@@ -165,6 +165,15 @@ g + geom_point(color = "firebrick")
 
 By applying that to our plotting element, the following plots based on `g` are going to have red points.
 
+And let's get rid of the greyish default ggplot look by setting a different built-in theme, e.g. `theme_bw`:
+
+```{r remove-grey-background}
+theme_set(theme_bw)
+g + geom_point(color = "firebrick")
+```
+
+(You can find more on how to use built-in themes and how to customize themes in the secion ["Working with Themes"](#themes).)
+
 [Jump back to Table of Content.](#toc)
 
 
@@ -371,7 +380,6 @@ ggplot(chic, aes(x = date, y = temp)) +
 ```{r default-font}
 theme_set(theme_gray(base_size = 12, base_family = "Roboto Condensed"))
 ```
-
 
 ### Change Spacing in Multi-Line Text
 
@@ -608,7 +616,7 @@ There are ways to change the entire look of your plot with one function (see bel
 ggplot(chic, aes(x = date, y = temp)) +
   geom_point(color = "firebrick") +
   labs(x = "Year", y = "Temperature (°F)") +
-  theme(panel.background = element_rect(fill = "white"))
+  theme(panel.background = element_rect(fill = "moccasin"))
 ```
 
 ### Change Grid Lines
@@ -619,7 +627,8 @@ There are two types of grid lines: major grid lines indicating the ticks and min
 ggplot(chic, aes(x = date, y = temp)) +
   geom_point(color = "firebrick") +
   labs(x = "Year", y = "Temperature (°F)") + 
-  theme(panel.grid.major = element_line(color = "gray10", size = 0.5),
+  theme(panel.background = element_rect(fill = "grey90"),
+        panel.grid.major = element_line(color = "gray10", size = 0.5),
         panel.grid.minor = element_line(color = "gray70", size = 0.25))
 ```
 
@@ -778,7 +787,7 @@ library(ggthemes)
 ggplot(chic, aes(x = date, y = temp, color = factor(season))) +
   geom_point() +
   labs(x = "Year", y = "Temperature (°F)") + 
-  ggtitle("Ups and Downs of Chicagos Daily Temperatures") +
+  ggtitle("Ups and Downs of Chicago's Daily Temperatures") +
   theme_economist() + 
   scale_color_economist(name = "Seasons:") +
   theme(legend.title = element_text(size = 12, face = "bold"))
@@ -1187,7 +1196,7 @@ my_grob <- grobTree(textGrob("This text stays in place!",
                                        fontface = "bold")))
 
 ggplot(chic, aes(x = temp, y = o3)) +
-  geom_point(color = "firebrick", alpha = 0.5) + 
+  geom_point(color = "tan", alpha = 0.5) + 
   labs(x = "Temperature (°F)", y ="Ozone") +
   annotation_custom(my_grob)
 ```
@@ -1196,7 +1205,7 @@ The value of this is particularly evident when you have multiple plots with **di
 
 ```{r grobTree-scales-free}
 ggplot(chic, aes(x = temp, y = o3)) +
-  geom_point(color = "firebrick") + 
+  geom_point(color = "tan") + 
   labs(x = "Temperature (°F)", y ="Ozone") +
   facet_wrap(~ season, scales = "free") +
   annotation_custom(my_grob)
@@ -1269,8 +1278,10 @@ chic %>%
   dplyr::summarize(rel = n() / unique(n_all)) %>% 
   ggplot(aes(x = "", y = rel)) +
     geom_col(aes(fill = factor(season)), width = 1) + 
-    labs(x = "", y = "Proportion of Days Exceeding\nthe Median Ozone Level") +
+    labs(x = "", 
+         y = "Proportion of Days Exceeding\nthe Median Ozone Level") +
     coord_polar("y") +
+    scale_fill_brewer(palette = "Set1", name = "Season:") +
     theme(axis.ticks = element_blank())
 ```
 
@@ -1316,7 +1327,7 @@ Try adding a little jitter to the data. I like this for in-house visualization b
 ```{r jitter}
 g + geom_jitter(aes(color = season), alpha = 0.25, 
                 position = position_jitter(width = 0.3)) +
-    theme(legend.title = element_blank())
+    theme(legend.position = "none")
 ```
 
 #### 3. Alternative: Violin Plots
@@ -1335,21 +1346,30 @@ We can of course combine both, estimated densities and the raw data points:
 g + geom_violin(aes(color = season), fill = "gray80", alpha = 0.5) +
     geom_jitter(aes(color = season), alpha = 0.25, 
                 position = position_jitter(width = 0.3)) +
-    theme(legend.title = element_blank()) +
+    theme(legend.position = "none") +
     coord_flip()
 ```
 
-#### 5. Alternative: Combining Violin Plots with Jitter and Box Plots
+The [`ggforce` package](https://ggforce.data-imaginist.com/) provides so-called sina functions where the width of the jitter is controlled by the density distribution of the data - that makes the jittering a bit more visually appealing:
+
+```{r}
+library(ggforce)
+
+g + geom_violin(aes(color = season), fill = "gray80", alpha = 0.5) +
+    geom_sina(aes(color = season), alpha = 0.25) +
+    theme(legend.position = "none") +
+    coord_flip()
+```
+
+#### 5. Alternative: Combining Violin Plots with Box Plots
 
 To allow for easy estimation of quantiles, we can also add the box of the boxplot inside the violins to indicate 25%-quartile, median and 75%-quartile:
 
 ```{r violin-jitter-box, fig.height = 6}
-g + geom_violin(aes(color = season), fill = "gray80", alpha = 0.5) +
+g + geom_violin(aes(fill = season), color = "transparent", alpha = 0.5) +
     geom_boxplot(outlier.alpha = 0, coef = 0, 
                  color = "gray40", width = 0.1) +
-    geom_jitter(aes(color = season), alpha = 0.25, 
-                position = position_jitter(width = 0.3), alpha = 0.3) +
-    theme(legend.title = element_blank()) +
+    theme(legend.position = "none") +
     coord_flip()
 ```
 
@@ -1486,8 +1506,8 @@ ggplot(chic, aes(x = temp, y = season, fill = ..x..)) +
   geom_density_ridges_gradient(scale = 0.9, gradient_lwd = 0.5, 
                                color = "black") + 
   scale_fill_viridis(option = "plasma", name = "") + 
-  labs(x = "Temperature (°F)", y = "Season") +
-  theme_ridges(grid = F)
+  labs(x = "Temperature (°F)", y = "Season:") +
+  theme_ridges(font_family = "Roboto Condensed", grid = F)
 ```
 
 We can also compare several groups per ridgeline and coloring them according to their group. This follows the idea of [Marc Belzunces](https://twitter.com/marcbeldata/status/888697140268204032).
@@ -1504,8 +1524,8 @@ ggplot(data = filter(chic, season %in% c("Summer", "Winter")),
                       labels = c(`1997 Summer` = "Summer", 
                                  `1997 Winter` = "Winter"),
                       values = c("tomato", "dodgerblue"),
-                      name = "Season", guide = "legend") +
-  theme_ridges() + 
+                      name = "Season:", guide = "legend") +
+  theme_ridges(font_family = "Roboto Condensed") + 
   labs(x = "Temperature (°F)", y = "Year")
 ```
 
@@ -1515,6 +1535,7 @@ The `ggridges` packages is also helpful to create histograms for different group
 ggplot(chic, aes(x = temp, y = factor(year), fill = year)) + 
   geom_density_ridges(stat = "binline", bins = 25, scale = 0.9, 
                       draw_baseline = F, show.legend = F) + 
+  theme_ridges(font_family = "Roboto Condensed") +
   labs(x = "Temperature (°F)", y = "Season")
 ```
 
