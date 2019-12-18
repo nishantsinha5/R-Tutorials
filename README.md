@@ -2,7 +2,7 @@
 
 R tutorials dealing with ggplot2, Rmarkdown, Ubuntu server with shiny, and NLMpy via PythonInR. For presentation and exercises at workshops as well as to use online as tutorial and cheatsheet.
 
-*Currently abandoned (but maybe some there will be some in the future...)*
+*Currently abandoned (but maybe there will be some updates in the future...)*
 
 Authors:
 * Cédric Scherer (cedricphilippscherer@gmail.com)
